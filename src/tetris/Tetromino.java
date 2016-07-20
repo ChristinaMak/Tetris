@@ -16,6 +16,7 @@ public class Tetromino {
 
     private javafx.scene.paint.Color color;
     private int[][] matrix;
+    private int[][] potentialMatrix;
     private Pair<Integer, Integer> topLeft;
     private Pair<Integer, Integer> potentialTopLeft;
 
@@ -56,19 +57,34 @@ public class Tetromino {
         this.potentialTopLeft = new Pair<Integer, Integer>(row, col);
     }
 
+    public int[][] getPotentialMatrix() {
+        return potentialMatrix;
+    }
+
+    public void setPotentialMatrix(int[][] potentialMatrix) {
+        this.potentialMatrix = potentialMatrix;
+    }
+
     /**
-     *  Rotates the tetromino clockwise
+     *  Returns the matrix of the tetromino rotated clockwise
      */
-    public void rotate() {
+    public int[][] rotate() {
         int[][] newMatrix = new int[MATRIX_SIZE][MATRIX_SIZE];
 
         for (int i = 0; i < MATRIX_SIZE; i++)
         {
             for (int j = 0; j < MATRIX_SIZE; j++)
             {
-                newMatrix[i][j] = transform(matrix[i][j]);
+                //newMatrix[i][j] = transform(matrix[i][j]);
+                if (this.getMatrix()[i][j] == 1)
+                {
+                    int newRow = j;
+                    int newCol = transform(i);
+                    newMatrix[newRow][newCol] = 1;
+                }
             }
         }
+        return newMatrix;
     }
 
     /** Helper for rotate method to transform index positioning */
@@ -91,6 +107,19 @@ public class Tetromino {
         for (Block block : blocks) {
             gc.fillRect(75, 75, 100, 100);
         }
+    }
+
+    public void printTetromino()
+    {
+        for (int i = 0; i < MATRIX_SIZE; i++)
+        {
+            for (int j = 0; j < MATRIX_SIZE; j++)
+            {
+                System.out.print(this.getMatrix()[i][j]);
+            }
+            System.out.println();
+        }
+        System.out.println();
     }
 
 }

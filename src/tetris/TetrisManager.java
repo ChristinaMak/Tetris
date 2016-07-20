@@ -12,7 +12,7 @@ public class TetrisManager {
         int[][] landed = board.getLanded();
 
         // set up an initial testing board
-        /*
+
         for (int i = 0; i < 7; i++)
         {
             landed[15][i] = 1;
@@ -37,27 +37,52 @@ public class TetrisManager {
         landed[12][6] = 1;
         landed[11][2] = 1;
         landed[11][3] = 1;
-        */
+
 
         board.printBoard();
         System.out.println();
 
         int[][] shapeArr = new int[4][4];
+        /*
+        // square
         shapeArr[0][0] = 1;
         shapeArr[0][1] = 1;
         shapeArr[1][0] = 1;
         shapeArr[1][1] = 1;
-
+        */
+        // J
+        System.out.println("Testing rotate: before");
+        shapeArr[0][1] = 1;
+        shapeArr[1][1] = 1;
+        shapeArr[2][1] = 1;
+        shapeArr[2][0] = 1;
         currPiece.setMatrix(shapeArr);
+        currPiece.printTetromino();
+        System.out.println("Testing rotate: after");
+        currPiece.rotate();;
+        currPiece.printTetromino();
+        System.out.println("Testing rotate: after");
+        currPiece.rotate();;
+        currPiece.printTetromino();
+        System.out.println("Testing rotate: after");
+        currPiece.rotate();;
+        currPiece.printTetromino();
+        System.out.println("Testing rotate: after");
+        currPiece.rotate();;
+        currPiece.printTetromino();
+
+
         //currPiece.setTopLeft(11, 4);
-        currPiece.setTopLeft(14, 4);
+        //currPiece.setTopLeft(14, 4);
+        currPiece.setTopLeft(0, 4);
 
         // draw blocks from landed array
 
         // draw block from current tetromino
 
         //currPiece.setPotentialTopLeft(12, 4);
-        currPiece.setPotentialTopLeft(15, 4);
+        //currPiece.setPotentialTopLeft(15, 4);
+        currPiece.setPotentialTopLeft(1, 4);
 
         if (checkCollisions(currPiece, landed))
         {
@@ -86,16 +111,20 @@ public class TetrisManager {
             {
                 if (currPiece.getMatrix()[i][j] != 0)
                 {
-                    /*
-                    System.out.println("from checking collisions");
-                    System.out.println("i: " + i + " row: " + currPiece.getPotentialTopLeft().getKey());
-                    System.out.println("j: " + j + " col: " + currPiece.getPotentialTopLeft().getValue());
-                    System.out.println(landed[i + currPiece.getPotentialTopLeft().getKey()]
-                            [j + currPiece.getPotentialTopLeft().getValue()]);
-                     */
+
                     if (i + currPiece.getPotentialTopLeft().getKey() >= landed.length)
                     {
                         // block would be below board
+                        collided = true;
+                    }
+                    else if (j + currPiece.getPotentialTopLeft().getValue() < 0)
+                    {
+                        // block would be to left of board
+                        collided = true;
+                    }
+                    else if (j + currPiece.getPotentialTopLeft().getValue() >= landed[0].length)
+                    {
+                        // block would be to right of board
                         collided = true;
                     }
                     else if (landed[i + currPiece.getPotentialTopLeft().getKey()]
@@ -110,6 +139,45 @@ public class TetrisManager {
 
         return collided;
     }
+
+    public static boolean checkRotateCollisions(Tetromino currPiece, int[][] landed) {
+        boolean collided = false;
+
+        for (int i = 0; i < 4; i++)
+        {
+            for (int j = 0; j < 4; j++)
+            {
+                if (currPiece.getPotentialMatrix()[i][j] != 0)
+                {
+
+                    if (i + currPiece.getTopLeft().getKey() >= landed.length)
+                    {
+                        // block would be below board
+                        collided = true;
+                    }
+                    else if (j + currPiece.getTopLeft().getValue() < 0)
+                    {
+                        // block would be to left of board
+                        collided = true;
+                    }
+                    else if (j + currPiece.getTopLeft().getValue() >= landed[0].length)
+                    {
+                        // block would be to right of board
+                        collided = true;
+                    }
+                    else if (landed[i + currPiece.getTopLeft().getKey()]
+                            [j + currPiece.getTopLeft().getValue()] != 0)
+                    {
+                        // this space is taken
+                        collided = true;
+                    }
+                }
+            }
+        }
+
+        return collided;
+    }
+
 
     public static void landTetromino(Tetromino currPiece, int[][] landed) {
         for (int i = 0; i < 4; i++)
@@ -137,4 +205,20 @@ public class TetrisManager {
         }
     }
 
+    public static void moveTetromino(Tetromino currPiece, int[][] landed, int direction) {
+        currPiece.setPotentialTopLeft(currPiece.getTopLeft().getKey(), currPiece.getTopLeft().getValue() + direction);
+
+        if (!checkCollisions(currPiece, landed))
+        {
+            currPiece.setTopLeft(currPiece.getPotentialTopLeft());
+        }
+    }
+
+    public static void rotateTetromino(Tetromino currPiece, int[][] landed) {
+        currPiece.setPotentialMatrix(currPiece.rotate());
+        if (!checkRotateCollisions(currPiece, landed))
+        {
+            currPiece.setMatrix(currPiece.rotate());
+        }
+    }
 }
