@@ -4,8 +4,8 @@ package tetris;
  * Created by Christina on 7/14/2016.
  */
 public class TetrisBoard {
-    private final int NUM_ROWS = 16;
-    private final int NUM_COLS = 10;
+    public static final int NUM_ROWS = 16;
+    public static final int NUM_COLS = 10;
 
     private int[][] landed;
 
@@ -103,6 +103,7 @@ public class TetrisBoard {
         currPiece.setPotentialTopLeft(currPiece.getTopLeft().getKey(), currPiece.getTopLeft().getValue() + direction);
 
         if (!checkCollisions(currPiece)) {
+            currPiece.setPrevTopLeft(currPiece.getTopLeft());
             currPiece.setTopLeft(currPiece.getPotentialTopLeft());
         }
     }

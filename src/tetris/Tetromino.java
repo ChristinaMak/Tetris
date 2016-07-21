@@ -16,8 +16,9 @@ public class Tetromino {
     private int[][] potentialMatrix;
     private Pair<Integer, Integer> topLeft;
     private Pair<Integer, Integer> potentialTopLeft;
+    private Pair<Integer, Integer> prevTopLeft;
 
-    private final int MATRIX_SIZE = 4;
+    public static final int MATRIX_SIZE = 4;
 
     /**
      * Constructor for a tetromino unit
@@ -31,26 +32,51 @@ public class Tetromino {
     }
 
     public Tetromino(char shape) {
-        shape = Character.toLowerCase(shape);
+        shape = Character.toUpperCase(shape);
         int[][] shapeMatrix = new int[MATRIX_SIZE][MATRIX_SIZE];
         switch(shape) {
-            case 'i': break;
-            case 'o':
+            case 'I':
+                shapeMatrix[0][0] = 1;
+                shapeMatrix[1][0] = 1;
+                shapeMatrix[2][0] = 1;
+                shapeMatrix[3][0] = 1;
+                break;
+            case 'O':
                 shapeMatrix[0][0] = 1;
                 shapeMatrix[0][1] = 1;
                 shapeMatrix[1][0] = 1;
                 shapeMatrix[1][1] = 1;
                 break;
-            case 't': break;
-            case 's': break;
-            case 'z': break;
-            case 'j':
+            case 'T':
+                shapeMatrix[0][1] = 1;
+                shapeMatrix[1][0] = 1;
+                shapeMatrix[1][1] = 1;
+                shapeMatrix[1][2] = 1;
+                break;
+            case 'S':
+                shapeMatrix[0][1] = 1;
+                shapeMatrix[0][2] = 1;
+                shapeMatrix[1][0] = 1;
+                shapeMatrix[1][1] = 1;
+                break;
+            case 'Z':
+                shapeMatrix[0][0] = 1;
+                shapeMatrix[0][1] = 1;
+                shapeMatrix[1][1] = 1;
+                shapeMatrix[1][2] = 1;
+                break;
+            case 'J':
                 shapeMatrix[0][1] = 1;
                 shapeMatrix[1][1] = 1;
                 shapeMatrix[2][1] = 1;
                 shapeMatrix[2][0] = 1;
                 break;
-            case 'l': break;
+            case 'L':
+                shapeMatrix[0][0] = 1;
+                shapeMatrix[1][0] = 1;
+                shapeMatrix[2][0] = 1;
+                shapeMatrix[2][1] = 1;
+                break;
             default: break;
         }
         setMatrix(shapeMatrix);
@@ -86,6 +112,14 @@ public class Tetromino {
 
     public void setPotentialTopLeft(int row, int col) {
         this.potentialTopLeft = new Pair<Integer, Integer>(row, col);
+    }
+
+    public Pair<Integer, Integer> getPrevTopLeft() {
+        return prevTopLeft;
+    }
+
+    public void setPrevTopLeft(Pair<Integer, Integer> prevTopLeft) {
+        this.prevTopLeft = prevTopLeft;
     }
 
     public int[][] getPotentialMatrix() {
@@ -148,17 +182,29 @@ public class Tetromino {
     }
 
     private static char intToChar(int shape) {
-        char shapeChar = 'o';
+        char shapeChar = 'O';
         switch (shape) {
-            case 0: break;
-            case 1: break;
-            case 2: break;
-            case 3: break;
-            case 4: break;
-            case 5:
-                shapeChar = 'j';
+            case 0:
+                shapeChar = 'I';
                 break;
-            case 6: break;
+            case 1:
+                shapeChar = 'O';
+                break;
+            case 2:
+                shapeChar = 'T';
+                break;
+            case 3:
+                shapeChar = 'S';
+                break;
+            case 4:
+                shapeChar = 'Z';
+                break;
+            case 5:
+                shapeChar = 'J';
+                break;
+            case 6:
+                shapeChar = 'L';
+                break;
             default: break;
         }
         return shapeChar;

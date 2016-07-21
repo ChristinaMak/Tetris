@@ -8,6 +8,9 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.GridPane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
@@ -15,24 +18,22 @@ import java.util.List;
 import java.util.Random;
 
 public class TetrisGame extends Application {
-
     private static final int TILE_SIZE = 40;
     private static final int GRID_WIDTH = 15;
     private static final int GRID_HEIGHT = 20;
+    private static final int TILE_GAP = 2;
 
     private double time;
     private GraphicsContext gContext;
 
     private List<Tetromino> tetrominos = new ArrayList<>();
     private Tetromino currPiece;
-    private int[][] boardMatrix;
-
     private TetrisBoard board;
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-        create();
-
+        GridPane grid = new GridPane();
+        create(grid);
         class KeyHandler implements EventHandler<KeyEvent> {
             @Override
             public void handle(KeyEvent e) {
@@ -43,7 +44,7 @@ public class TetrisGame extends Application {
                         break;
                     case DOWN:
                         System.out.println("handle down");
-                        update();
+                        update(grid);
                         break;
                     case LEFT:
                         System.out.println("handle move left");
@@ -59,15 +60,17 @@ public class TetrisGame extends Application {
 
         Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
         primaryStage.setTitle("Hello World");
-        Scene scene = new Scene(root, 300, 275);
+        //Scene scene = new Scene(root, 450, 750);
+        Scene scene = new Scene(grid, 450, 750);
         scene.setOnKeyPressed(new KeyHandler());
         primaryStage.setScene(scene);
         primaryStage.show();
     }
 
-    public void create() {
+    public void create(GridPane grid) {
         board = new TetrisBoard();
-        spawnTetromino();
+        drawGridSquares(grid);
+        spawnTetromino(grid);
 
         AnimationTimer timer = new AnimationTimer() {
             @Override
@@ -76,7 +79,7 @@ public class TetrisGame extends Application {
 
                 if (time >= 0.5) {
                     time = 0;
-                    update();
+                    update(grid);
                 }
             }
         };
@@ -85,27 +88,82 @@ public class TetrisGame extends Application {
         //currPiece.setTopLeft(0, 4);
     }
 
-    public void spawnTetromino() {
+    public void drawGridSquares(GridPane grid) {
+        grid.setVgap(TILE_GAP);
+        grid.setHgap(TILE_GAP);
+        for (int i = 0; i < TetrisBoard.NUM_ROWS; i++) {
+            for (int j = 0; j < TetrisBoard.NUM_COLS; j++) {
+                Rectangle block = new Rectangle(TILE_SIZE, TILE_SIZE, Color.ALICEBLUE);
+                grid.add(block, j, i);
+            }
+        }
+    }
+
+    public void spawnTetromino(GridPane grid) {
         Random random = new Random();
         currPiece = new Tetromino(random.nextInt(7));
         currPiece.setTopLeft(0, 4);
     }
 
-    public void update() {
+    public void update(GridPane grid) {
         int currX = currPiece.getTopLeft().getKey();
         int currY = currPiece.getTopLeft().getValue();
         currPiece.setPotentialTopLeft(currX + 1, currY);
         if (board.checkCollisions(currPiece)) {
-            // collision found, land tetromino
+            // collision found, land tetromino and spawn a new one
             System.out.println("collision: " + currX + ", " + currY);
             board.landTetromino(currPiece);
+            updateBoardLandedGUI(grid);
+
+            spawnTetromino(grid);
         }
         else {
             // no collision, tetromino continues falling
+            currPiece.setPrevTopLeft(currPiece.getTopLeft());
             currPiece.setTopLeft(currPiece.getPotentialTopLeft());
         }
+
+        updateCurrPieceGUI(grid);
+        //removePrevPieceGUI(grid);
+
         board.printBoard();
         System.out.println();
+    }
+
+    public void updateBoardLandedGUI(GridPane grid) {
+        for (int i = 0; i < TetrisBoard.NUM_ROWS; i++) {
+            for (int j = 0; j < TetrisBoard.NUM_COLS; j++) {
+                if (board.getLanded()[i][j] != 0) {
+                    Rectangle block = new Rectangle(TILE_SIZE, TILE_SIZE, Color.RED);
+                    grid.add(block, j, i);
+                }
+            }
+        }
+    }
+
+    public void updateCurrPieceGUI(GridPane grid) {
+        for (int i = 0; i < Tetromino.MATRIX_SIZE; i++) {
+            System.out.println("reached i");
+            for (int j = 0; j < Tetromino.MATRIX_SIZE; j++) {
+                System.out.println("reached j");
+                if (currPiece.getMatrix()[i][j] != 0) {
+                    Rectangle block = new Rectangle(TILE_SIZE, TILE_SIZE, Color.GREEN);
+                    //System.out.println("updateCurrPieceGUI " + m + ", " + n);
+                    grid.add(block, j + currPiece.getTopLeft().getValue(), i + currPiece.getTopLeft().getKey());
+                }
+            }
+        }
+    }
+
+    public void removePrevPieceGUI(GridPane grid) {
+        for (int i = 0; i < Tetromino.MATRIX_SIZE; i++) {
+            for (int j = 0; j < Tetromino.MATRIX_SIZE; j++) {
+                if (currPiece.getMatrix()[i][j] != 0) {
+                    Rectangle block = new Rectangle(TILE_SIZE, TILE_SIZE, Color.ALICEBLUE);
+                    grid.add(block, j + currPiece.getPrevTopLeft().getValue(), i + currPiece.getPrevTopLeft().getKey());
+                }
+            }
+        }
     }
 
     /*
