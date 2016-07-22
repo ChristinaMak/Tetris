@@ -28,6 +28,7 @@ public class TetrisGame extends Application {
 
     private List<Tetromino> tetrominos = new ArrayList<>();
     private Tetromino currPiece;
+    private Tetromino prevPiece;
     private TetrisBoard board;
 
     @Override
@@ -41,6 +42,8 @@ public class TetrisGame extends Application {
                     case UP:
                         System.out.println("handle up");
                         board.rotateTetromino(currPiece);
+                        removePrevRotatedPieceGUI(grid);
+                        update(grid);
                         break;
                     case DOWN:
                         System.out.println("handle down");
@@ -49,10 +52,14 @@ public class TetrisGame extends Application {
                     case LEFT:
                         System.out.println("handle move left");
                         board.moveTetromino(currPiece, -1);
+                        removePrevPieceGUI(grid);
+                        update(grid);
                         break;
                     case RIGHT:
                         System.out.println("handle right");
                         board.moveTetromino(currPiece, 1);
+                        removePrevPieceGUI(grid);
+                        update(grid);
                         break;
                 }
             }
@@ -123,8 +130,8 @@ public class TetrisGame extends Application {
             currPiece.setTopLeft(currPiece.getPotentialTopLeft());
         }
 
+        removePrevPieceGUI(grid);
         updateCurrPieceGUI(grid);
-        //removePrevPieceGUI(grid);
 
         board.printBoard();
         System.out.println();
@@ -143,12 +150,10 @@ public class TetrisGame extends Application {
 
     public void updateCurrPieceGUI(GridPane grid) {
         for (int i = 0; i < Tetromino.MATRIX_SIZE; i++) {
-            System.out.println("reached i");
             for (int j = 0; j < Tetromino.MATRIX_SIZE; j++) {
-                System.out.println("reached j");
                 if (currPiece.getMatrix()[i][j] != 0) {
                     Rectangle block = new Rectangle(TILE_SIZE, TILE_SIZE, Color.GREEN);
-                    //System.out.println("updateCurrPieceGUI " + m + ", " + n);
+                    System.out.println("updateCurrPieceGUI " + j + currPiece.getTopLeft().getValue() + ", " + i + currPiece.getTopLeft().getKey());
                     grid.add(block, j + currPiece.getTopLeft().getValue(), i + currPiece.getTopLeft().getKey());
                 }
             }
@@ -160,7 +165,23 @@ public class TetrisGame extends Application {
             for (int j = 0; j < Tetromino.MATRIX_SIZE; j++) {
                 if (currPiece.getMatrix()[i][j] != 0) {
                     Rectangle block = new Rectangle(TILE_SIZE, TILE_SIZE, Color.ALICEBLUE);
-                    grid.add(block, j + currPiece.getPrevTopLeft().getValue(), i + currPiece.getPrevTopLeft().getKey());
+                    //System.out.println("removePrevPieceGUI " + j + currPiece.getPrevTopLeft().getValue() + ", " + i + currPiece.getPrevTopLeft().getKey());
+                    try {
+                        grid.add(block, j + currPiece.getPrevTopLeft().getValue(), i + currPiece.getPrevTopLeft().getKey());
+                    }
+                    catch (NullPointerException e) {
+                    }
+                }
+            }
+        }
+    }
+
+    public void removePrevRotatedPieceGUI(GridPane grid) {
+        for (int i = 0; i < Tetromino.MATRIX_SIZE; i++) {
+            for (int j = 0; j < Tetromino.MATRIX_SIZE; j++) {
+                if (currPiece.getPrevMatrix()[i][j] != 0) {
+                    Rectangle block = new Rectangle(TILE_SIZE, TILE_SIZE, Color.ALICEBLUE);
+                    grid.add(block, j + currPiece.getTopLeft().getValue(), i + currPiece.getTopLeft().getKey());
                 }
             }
         }

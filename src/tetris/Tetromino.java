@@ -14,6 +14,7 @@ public class Tetromino {
     private javafx.scene.paint.Color color;
     private int[][] matrix;
     private int[][] potentialMatrix;
+    private int[][] prevMatrix;
     private Pair<Integer, Integer> topLeft;
     private Pair<Integer, Integer> potentialTopLeft;
     private Pair<Integer, Integer> prevTopLeft;
@@ -124,6 +125,14 @@ public class Tetromino {
 
     public int[][] getPotentialMatrix() {
         return potentialMatrix;
+    }
+
+    public int[][] getPrevMatrix() {
+        return prevMatrix;
+    }
+
+    public void setPrevMatrix(int[][] prevMatrix) {
+        this.prevMatrix = prevMatrix;
     }
 
     public void setPotentialMatrix(int[][] potentialMatrix) {

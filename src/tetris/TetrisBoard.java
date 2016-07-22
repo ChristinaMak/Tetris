@@ -111,6 +111,7 @@ public class TetrisBoard {
     public void rotateTetromino(Tetromino currPiece) {
         currPiece.setPotentialMatrix(currPiece.rotate());
         if (!checkRotateCollisions(currPiece)) {
+            currPiece.setPrevMatrix(currPiece.getMatrix());
             currPiece.setMatrix(currPiece.rotate());
         }
     }
