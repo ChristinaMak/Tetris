@@ -2,6 +2,7 @@ package tetris;
 
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.*;
+import javafx.scene.paint.Color;
 import javafx.util.Pair;
 
 import java.awt.*;
@@ -22,7 +23,7 @@ public class Tetromino {
     public static final int MATRIX_SIZE = 4;
 
     /**
-     * Constructor for a tetromino unit
+     * No argument constructor for a tetromino
      */
     public Tetromino() {
         matrix = new int[MATRIX_SIZE][MATRIX_SIZE];
@@ -32,6 +33,10 @@ public class Tetromino {
         matrix = shape;
     }
 
+    /**
+     * Constructor for a tetromino with shape given in char
+     * @param shape the shape of the tetromino given as char
+     */
     public Tetromino(char shape) {
         shape = Character.toUpperCase(shape);
         int[][] shapeMatrix = new int[MATRIX_SIZE][MATRIX_SIZE];
@@ -41,48 +46,59 @@ public class Tetromino {
                 shapeMatrix[1][0] = 1;
                 shapeMatrix[2][0] = 1;
                 shapeMatrix[3][0] = 1;
+                color = Color.DARKTURQUOISE;
                 break;
             case 'O':
-                shapeMatrix[0][0] = 1;
-                shapeMatrix[0][1] = 1;
-                shapeMatrix[1][0] = 1;
-                shapeMatrix[1][1] = 1;
+                shapeMatrix[0][0] = 2;
+                shapeMatrix[0][1] = 2;
+                shapeMatrix[1][0] = 2;
+                shapeMatrix[1][1] = 2;
+                color = Color.GOLD;
                 break;
             case 'T':
-                shapeMatrix[0][1] = 1;
-                shapeMatrix[1][0] = 1;
-                shapeMatrix[1][1] = 1;
-                shapeMatrix[1][2] = 1;
+                shapeMatrix[0][1] = 3;
+                shapeMatrix[1][0] = 3;
+                shapeMatrix[1][1] = 3;
+                shapeMatrix[1][2] = 3;
+                color = Color.DARKMAGENTA;
                 break;
             case 'S':
-                shapeMatrix[0][1] = 1;
-                shapeMatrix[0][2] = 1;
-                shapeMatrix[1][0] = 1;
-                shapeMatrix[1][1] = 1;
+                shapeMatrix[0][1] = 4;
+                shapeMatrix[0][2] = 4;
+                shapeMatrix[1][0] = 4;
+                shapeMatrix[1][1] = 4;
+                color = Color.CHARTREUSE;
                 break;
             case 'Z':
-                shapeMatrix[0][0] = 1;
-                shapeMatrix[0][1] = 1;
-                shapeMatrix[1][1] = 1;
-                shapeMatrix[1][2] = 1;
+                shapeMatrix[0][0] = 5;
+                shapeMatrix[0][1] = 5;
+                shapeMatrix[1][1] = 5;
+                shapeMatrix[1][2] = 5;
+                color = Color.RED;
                 break;
             case 'J':
-                shapeMatrix[0][1] = 1;
-                shapeMatrix[1][1] = 1;
-                shapeMatrix[2][1] = 1;
-                shapeMatrix[2][0] = 1;
+                shapeMatrix[0][1] = 6;
+                shapeMatrix[1][1] = 6;
+                shapeMatrix[2][1] = 6;
+                shapeMatrix[2][0] = 6;
+                color = Color.NAVY;
                 break;
             case 'L':
-                shapeMatrix[0][0] = 1;
-                shapeMatrix[1][0] = 1;
-                shapeMatrix[2][0] = 1;
-                shapeMatrix[2][1] = 1;
+                shapeMatrix[0][0] = 7;
+                shapeMatrix[1][0] = 7;
+                shapeMatrix[2][0] = 7;
+                shapeMatrix[2][1] = 7;
+                color = Color.ORANGE;
                 break;
             default: break;
         }
         setMatrix(shapeMatrix);
     }
 
+    /**
+     * Constructor for a tetromino with shape given in int
+     * @param shape the shape of the tetromino given as int
+     */
     public Tetromino(int shape) {
         this(intToChar(shape));
     }
@@ -139,6 +155,10 @@ public class Tetromino {
         this.potentialMatrix = potentialMatrix;
     }
 
+    public Color getColor() {
+        return color;
+    }
+
     /**
      *  Returns the matrix of the tetromino rotated clockwise
      */
@@ -148,10 +168,10 @@ public class Tetromino {
         for (int i = 0; i < MATRIX_SIZE; i++) {
             for (int j = 0; j < MATRIX_SIZE; j++) {
                 //newMatrix[i][j] = transform(matrix[i][j]);
-                if (this.getMatrix()[i][j] == 1) {
+                if (this.getMatrix()[i][j] != 0) {
                     int newRow = j;
                     int newCol = transform(i);
-                    newMatrix[newRow][newCol] = 1;
+                    newMatrix[newRow][newCol] = this.getMatrix()[i][j];
                 }
             }
         }
@@ -170,16 +190,6 @@ public class Tetromino {
         return newIndex;
     }
 
-    /** Draws tetromino */
-    /*
-    public void draw(GraphicsContext gc) {
-        gc.setFill(color);
-        for (Block block : blocks) {
-            gc.fillRect(75, 75, 100, 100);
-        }
-    }
-    */
-
     public void printTetromino() {
         for (int i = 0; i < MATRIX_SIZE; i++) {
             for (int j = 0; j < MATRIX_SIZE; j++) {
@@ -190,6 +200,7 @@ public class Tetromino {
         System.out.println();
     }
 
+    /** Helper to turn int code of shape from random generator to char code of shape */
     private static char intToChar(int shape) {
         char shapeChar = 'O';
         switch (shape) {

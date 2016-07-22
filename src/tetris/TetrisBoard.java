@@ -1,5 +1,9 @@
 package tetris;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Created by Christina on 7/14/2016.
  */
@@ -13,6 +17,11 @@ public class TetrisBoard {
         landed = new int[NUM_ROWS][NUM_COLS];
     }
 
+    /**
+     * Checks whether a tetromino will collide with another tetromino or the ground in the next move
+     * @param currPiece the tetromino for which collisions will be checked
+     * @return whether or not the tetromino had a collision
+     */
     public boolean checkCollisions(Tetromino currPiece) {
         boolean collided = false;
 
@@ -44,6 +53,11 @@ public class TetrisBoard {
         return collided;
     }
 
+    /**
+     * Checks whether a tetromino will have a collision when rotated
+     * @param currPiece the tetromino for which collisions will be checked
+     * @return whether
+     */
     public boolean checkRotateCollisions(Tetromino currPiece) {
         boolean collided = false;
 
@@ -114,6 +128,54 @@ public class TetrisBoard {
             currPiece.setPrevMatrix(currPiece.getMatrix());
             currPiece.setMatrix(currPiece.rotate());
         }
+    }
+
+    public void clearLineCheck () {
+        for (int i = 0; i < NUM_ROWS; i++) {
+            boolean filled = true;
+            for (int j = 0; j < NUM_COLS; j++) {
+                if (this.getLanded()[i][j] == 0) {
+                    filled = false;
+                }
+            }
+
+            if (filled) {
+                System.out.println("clear line");
+                // remove filled line
+                setLanded(spliceLine(this.getLanded(), i));
+
+                // add new empty line
+                setLanded(addNewLine(this.getLanded()));
+            }
+        }
+    }
+
+    public boolean checkLine() {
+        boolean fullLine = false;
+
+        boolean filled = true;
+        for (int i = 0; i < NUM_ROWS; i++) {
+            for (int j = 0; j < NUM_COLS; j++) {
+                if (this.getLanded()[i][j] == 0) {
+                    filled = false;
+                }
+            }
+            fullLine = filled;
+        }
+
+        return fullLine;
+    }
+
+    public int[][] spliceLine(int[][] grid, int row) {
+        List<int[]> list = new ArrayList<int[]>(Arrays.asList(grid));
+        list.remove(row);
+        return list.toArray(new int[][]{});
+    }
+
+    public int[][] addNewLine(int[][] grid) {
+        List<int[]> list = new ArrayList<int[]>(Arrays.asList(grid));
+        list.add(0, new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
+        return list.toArray(new int[][]{});
     }
 
     public int[][] getLanded() {

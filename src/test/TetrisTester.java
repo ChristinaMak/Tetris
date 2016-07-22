@@ -11,8 +11,7 @@ public class TetrisTester {
     private Tetromino currPiece;
 
     @Before
-    public  void setUp()
-    {
+    public  void setUp() {
         board = new TetrisBoard();
         currPiece = new Tetromino();
         int[][] landed = board.getLanded();
@@ -54,8 +53,7 @@ public class TetrisTester {
     }
 
     @Test
-    public void testRotate()
-    {
+    public void testRotate() {
         int[][] expArr = new int[4][4];
         expArr[0][1] = 1;
         expArr[1][1] = 1;
@@ -66,8 +64,7 @@ public class TetrisTester {
     }
 
     @Test
-    public void testLandTetromino()
-    {
+    public void testLandTetromino() {
         // set up expected board
         TetrisBoard expBoard = new TetrisBoard();
         int[][] landed = new int[16][10];
@@ -128,5 +125,60 @@ public class TetrisTester {
         }
 
         assertArrayEquals("tetromino landing failure", expBoard.getLanded(), board.getLanded());
+    }
+
+    @Test
+    public void testSpliceLine() {
+        int[][] landed = new int[board.NUM_ROWS][board.NUM_COLS];
+        for (int i = 0; i < 10; i++)
+        {
+            landed[15][i] = 1;
+        }
+        for (int i = 0; i < 10; i++)
+        {
+            landed[14][i] = 2;
+        }
+        board.setLanded(landed);
+
+        int[][] expLanded = new int[board.NUM_ROWS - 1][board.NUM_COLS];
+        for (int i = 0; i < 10; i++)
+        {
+            expLanded[14][i] = 1;
+        }
+
+        board.setLanded(board.spliceLine(board.getLanded(), 14));
+        assertArrayEquals(board.getLanded(), expLanded);
+    }
+
+    @Test
+    public void testAddNewLine() {
+        int[][] landed = new int[board.NUM_ROWS][board.NUM_COLS];
+        for (int i = 0; i < 10; i++)
+        {
+            landed[15][i] = 1;
+        }
+        for (int i = 0; i < 10; i++)
+        {
+            landed[14][i] = 2;
+        }
+        board.setLanded(landed);
+
+        int[][] expLanded = new int[board.NUM_ROWS + 1][board.NUM_COLS];
+        for (int i = 0; i < 10; i++)
+        {
+            expLanded[16][i] = 1;
+        }
+        for (int i = 0; i < 10; i++)
+        {
+            expLanded[15][i] = 2;
+        }
+
+        board.setLanded(board.addNewLine(board.getLanded()));
+        assertArrayEquals(board.getLanded(), expLanded);
+    }
+
+    @Test
+    public void testClearLineCheck() {
+        
     }
 }
