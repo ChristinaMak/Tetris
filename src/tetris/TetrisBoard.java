@@ -150,22 +150,6 @@ public class TetrisBoard {
         }
     }
 
-    public boolean checkLine() {
-        boolean fullLine = false;
-
-        boolean filled = true;
-        for (int i = 0; i < NUM_ROWS; i++) {
-            for (int j = 0; j < NUM_COLS; j++) {
-                if (this.getLanded()[i][j] == 0) {
-                    filled = false;
-                }
-            }
-            fullLine = filled;
-        }
-
-        return fullLine;
-    }
-
     public int[][] spliceLine(int[][] grid, int row) {
         List<int[]> list = new ArrayList<int[]>(Arrays.asList(grid));
         list.remove(row);
@@ -176,6 +160,19 @@ public class TetrisBoard {
         List<int[]> list = new ArrayList<int[]>(Arrays.asList(grid));
         list.add(0, new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
         return list.toArray(new int[][]{});
+    }
+
+    public boolean checkBoardFull() {
+        boolean full = false;
+
+        // check if there are any blocks in top row
+        for (int i = 0; i < NUM_COLS; i++) {
+            if (getLanded()[0][i] != 0) {
+                full = true;
+            }
+        }
+
+        return full;
     }
 
     public int[][] getLanded() {

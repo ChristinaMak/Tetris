@@ -27,7 +27,10 @@ public class TetrisGame extends Application {
     public void start(Stage primaryStage) throws Exception{
         GridPane grid = new GridPane();
         grid.setStyle("-fx-background-color: #c0c0c0");
-        create(grid);
+        primaryStage.setTitle("Tetris");
+        Scene scene = new Scene(grid, GRID_WIDTH, GRID_HEIGHT);
+        create(grid, scene);
+
         class KeyHandler implements EventHandler<KeyEvent> {
             @Override
             public void handle(KeyEvent e) {
@@ -58,16 +61,12 @@ public class TetrisGame extends Application {
             }
         }
 
-        //Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
-        primaryStage.setTitle("Tetris");
-        //Scene scene = new Scene(root, 450, 750);
-        Scene scene = new Scene(grid, GRID_WIDTH, GRID_HEIGHT);
         scene.setOnKeyPressed(new KeyHandler());
         primaryStage.setScene(scene);
         primaryStage.show();
     }
 
-    private void create(GridPane grid) {
+    private void create(GridPane grid, Scene scene) {
         board = new TetrisBoard();
         drawGridSquares(grid);
         spawnTetromino();
@@ -75,17 +74,17 @@ public class TetrisGame extends Application {
         AnimationTimer timer = new AnimationTimer() {
             @Override
             public void handle(long now) {
-//                time += 0.017;
                 time += 0.015;
-                if (time >= 0.5) {
+                if (time >= 0.5 && !board.checkBoardFull()) {
                     time = 0;
                     update(grid);
+                }
+                if (board.checkBoardFull()) {
+                    scene.setOnKeyPressed(null);
                 }
             }
         };
         timer.start();
-        //currPiece = new Tetromino('o');
-        //currPiece.setTopLeft(0, 4);
     }
 
     private void drawGridSquares(GridPane grid) {
