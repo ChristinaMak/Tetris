@@ -130,7 +130,8 @@ public class TetrisBoard {
         }
     }
 
-    public void clearLineCheck () {
+    public int clearLineCheck () {
+        int linesCleared = 0;
         for (int i = 0; i < NUM_ROWS; i++) {
             boolean filled = true;
             for (int j = 0; j < NUM_COLS; j++) {
@@ -141,6 +142,7 @@ public class TetrisBoard {
 
             if (filled) {
                 System.out.println("clear line");
+                linesCleared++;
                 // remove filled line
                 setLanded(spliceLine(this.getLanded(), i));
 
@@ -148,6 +150,7 @@ public class TetrisBoard {
                 setLanded(addNewLine(this.getLanded()));
             }
         }
+        return linesCleared;
     }
 
     public int[][] spliceLine(int[][] grid, int row) {

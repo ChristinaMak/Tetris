@@ -23,20 +23,27 @@ public class TetrisGame extends Application {
     private static final int GRID_HEIGHT = 750;
     private static final int TILE_GAP = 1;
     private static final int GAME_OVER_SPAN = 10;
+    private static final int SCORE_SPAN = 4;
     private static final double GAME_OVER_TEXT_SIZE = 50;
+    private static final double SCORE_TEXT_SIZE = 20;
 
     private double time;
 
     private Tetromino currPiece;
     private TetrisBoard board;
+    private int score = 0;
 
     @Override
     public void start(Stage primaryStage) throws Exception{
         GridPane grid = new GridPane();
         grid.setStyle("-fx-background-color: #c0c0c0");
+        GridPane layoutGrid = new GridPane();
+        layoutGrid.add(grid, 0, 0);
+        layoutGrid.setStyle("-fx-background-color: #9b978e");
         primaryStage.setTitle("Tetris");
-        Scene scene = new Scene(grid, GRID_WIDTH, GRID_HEIGHT);
-        create(grid, scene);
+        Scene scene = new Scene(layoutGrid, GRID_WIDTH, GRID_HEIGHT);
+        Text scoreLabel = createScore(layoutGrid);
+        create(grid, scene, scoreLabel, layoutGrid);
 
         class KeyHandler implements EventHandler<KeyEvent> {
             @Override
@@ -46,23 +53,23 @@ public class TetrisGame extends Application {
                         System.out.println("handle up");
                         board.rotateTetromino(currPiece);
                         removePrevRotatedPieceGUI(grid);
-                        update(grid);
+                        update(grid, scoreLabel, true);
                         break;
                     case DOWN:
                         System.out.println("handle down");
-                        update(grid);
+                        update(grid, scoreLabel, false);
                         break;
                     case LEFT:
                         System.out.println("handle move left");
                         board.moveTetromino(currPiece, -1);
                         removePrevPieceGUI(grid);
-                        update(grid);
+                        update(grid, scoreLabel, true);
                         break;
                     case RIGHT:
                         System.out.println("handle right");
                         board.moveTetromino(currPiece, 1);
                         removePrevPieceGUI(grid);
-                        update(grid);
+                        update(grid, scoreLabel, true);
                         break;
                 }
             }
@@ -73,7 +80,7 @@ public class TetrisGame extends Application {
         primaryStage.show();
     }
 
-    private void create(GridPane grid, Scene scene) {
+    private void create(GridPane grid, Scene scene, Text scoreLabel, GridPane layoutGrid) {
         board = new TetrisBoard();
         drawGridSquares(grid);
         spawnTetromino();
@@ -84,11 +91,11 @@ public class TetrisGame extends Application {
                 time += 0.015;
                 if (time >= 0.5 && !board.checkBoardFull()) {
                     time = 0;
-                    update(grid);
+                    update(grid, scoreLabel, false);
                 }
                 if (board.checkBoardFull()) {
                     scene.setOnKeyPressed(null);
-                    displayGameOver(grid, this);
+                    displayGameOver(layoutGrid, this);
                 }
             }
         };
@@ -112,7 +119,7 @@ public class TetrisGame extends Application {
         currPiece.setTopLeft(0, 4);
     }
 
-    private void update(GridPane grid) {
+    private void update(GridPane grid, Text scoreLabel, boolean pause) {
         int currX = currPiece.getTopLeft().getKey();
         int currY = currPiece.getTopLeft().getValue();
         currPiece.setPotentialTopLeft(currX + 1, currY);
@@ -120,15 +127,18 @@ public class TetrisGame extends Application {
             // collision found, land tetromino and spawn a new one
             System.out.println("collision: " + currX + ", " + currY);
             board.landTetromino(currPiece);
-            board.clearLineCheck();
+            int linesCleared = board.clearLineCheck();
+            updateScore(linesCleared, scoreLabel);
             updateBoardLandedGUI(grid);
 
             spawnTetromino();
         }
         else {
             // no collision, tetromino continues falling
-            currPiece.setPrevTopLeft(currPiece.getTopLeft());
-            currPiece.setTopLeft(currPiece.getPotentialTopLeft());
+            if (!pause) {
+                currPiece.setPrevTopLeft(currPiece.getTopLeft());
+                currPiece.setTopLeft(currPiece.getPotentialTopLeft());
+            }
         }
 
         removePrevPieceGUI(grid);
@@ -236,6 +246,33 @@ public class TetrisGame extends Application {
         grid.add(gameOverText, 0, TetrisBoard.NUM_ROWS, GAME_OVER_SPAN, GAME_OVER_SPAN);
 
         timer.stop();
+    }
+
+    private Text createScore(GridPane grid) {
+        Text scoreLabel = new Text("Score: " + score);
+        scoreLabel.setFont(Font.font("Courier New", FontWeight.EXTRA_BOLD, SCORE_TEXT_SIZE));
+        grid.add(scoreLabel, 1, 1, SCORE_SPAN, SCORE_SPAN);
+
+        return scoreLabel;
+    }
+
+    private void updateScore(int linesCleared, Text scoreLabel) {
+        switch (linesCleared) {
+            case 1:
+                score += 40;
+                break;
+            case 2:
+                score += 100;
+                break;
+            case 3:
+                score += 300;
+                break;
+            case 4:
+                score += 1200;
+                break;
+        }
+
+        scoreLabel.setText("Score: " + score);
     }
 
     public static void main(String[] args) {
