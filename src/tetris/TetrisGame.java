@@ -3,20 +3,27 @@ package tetris;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.event.EventHandler;
+import javafx.geometry.HPos;
+import javafx.geometry.VPos;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.util.Random;
 
 public class TetrisGame extends Application {
     private static final int TILE_SIZE = 40;
-    private static final int GRID_WIDTH = 450;
+    private static final int GRID_WIDTH = 650;
     private static final int GRID_HEIGHT = 750;
     private static final int TILE_GAP = 1;
+    private static final int GAME_OVER_SPAN = 10;
+    private static final double GAME_OVER_TEXT_SIZE = 50;
 
     private double time;
 
@@ -81,6 +88,7 @@ public class TetrisGame extends Application {
                 }
                 if (board.checkBoardFull()) {
                     scene.setOnKeyPressed(null);
+                    displayGameOver(grid, this);
                 }
             }
         };
@@ -214,6 +222,20 @@ public class TetrisGame extends Application {
                 }
             }
         }
+    }
+
+    private void displayGameOver(GridPane grid, AnimationTimer timer)
+    {
+        //the game over text
+        Text gameOverText = new Text("Game Over");
+        gameOverText.setFont(Font.font("Courier New",
+                FontWeight.EXTRA_BOLD, GAME_OVER_TEXT_SIZE));
+        gameOverText.setFill(Color.BLACK);
+        GridPane.setHalignment(gameOverText, HPos.CENTER);
+        GridPane.setValignment(gameOverText, VPos.CENTER);
+        grid.add(gameOverText, 0, TetrisBoard.NUM_ROWS, GAME_OVER_SPAN, GAME_OVER_SPAN);
+
+        timer.stop();
     }
 
     public static void main(String[] args) {
