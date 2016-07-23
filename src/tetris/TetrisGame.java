@@ -19,6 +19,7 @@ import java.util.Random;
 
 public class TetrisGame extends Application {
     private static final int TILE_SIZE = 40;
+    private static final int PRE_TILE_SIZE = 20;
     private static final int GRID_WIDTH = 650;
     private static final int GRID_HEIGHT = 750;
     private static final int TILE_GAP = 1;
@@ -30,6 +31,7 @@ public class TetrisGame extends Application {
     private double time;
 
     private Tetromino currPiece;
+    private Tetromino nextPiece;
     private TetrisBoard board;
     private int score = 0;
 
@@ -53,23 +55,23 @@ public class TetrisGame extends Application {
                         System.out.println("handle up");
                         board.rotateTetromino(currPiece);
                         removePrevRotatedPieceGUI(grid);
-                        update(grid, scoreLabel, true);
+                        update(grid,layoutGrid, scoreLabel, true);
                         break;
                     case DOWN:
                         System.out.println("handle down");
-                        update(grid, scoreLabel, false);
+                        update(grid, layoutGrid, scoreLabel, false);
                         break;
                     case LEFT:
                         System.out.println("handle move left");
                         board.moveTetromino(currPiece, -1);
                         removePrevPieceGUI(grid);
-                        update(grid, scoreLabel, true);
+                        update(grid, layoutGrid, scoreLabel, true);
                         break;
                     case RIGHT:
                         System.out.println("handle right");
                         board.moveTetromino(currPiece, 1);
                         removePrevPieceGUI(grid);
-                        update(grid, scoreLabel, true);
+                        update(grid, layoutGrid, scoreLabel, true);
                         break;
                 }
             }
@@ -83,7 +85,9 @@ public class TetrisGame extends Application {
     private void create(GridPane grid, Scene scene, Text scoreLabel, GridPane layoutGrid) {
         board = new TetrisBoard();
         drawGridSquares(grid);
-        spawnTetromino();
+        currPiece = spawnTetromino();
+        nextPiece = spawnTetromino();
+        updatePreviewBox(nextPiece);
 
         AnimationTimer timer = new AnimationTimer() {
             @Override
@@ -91,7 +95,7 @@ public class TetrisGame extends Application {
                 time += 0.015;
                 if (time >= 0.5 && !board.checkBoardFull()) {
                     time = 0;
-                    update(grid, scoreLabel, false);
+                    update(grid, layoutGrid, scoreLabel, false);
                 }
                 if (board.checkBoardFull()) {
                     scene.setOnKeyPressed(null);
@@ -113,13 +117,15 @@ public class TetrisGame extends Application {
         }
     }
 
-    private void spawnTetromino() {
+    private Tetromino spawnTetromino() {
+        Tetromino newPiece;
         Random random = new Random();
-        currPiece = new Tetromino(random.nextInt(7));
-        currPiece.setTopLeft(0, 4);
+        newPiece = new Tetromino(random.nextInt(7));
+        newPiece.setTopLeft(0, 4);
+        return newPiece;
     }
 
-    private void update(GridPane grid, Text scoreLabel, boolean pause) {
+    private void update(GridPane grid, GridPane layoutGrid, Text scoreLabel, boolean pause) {
         int currX = currPiece.getTopLeft().getKey();
         int currY = currPiece.getTopLeft().getValue();
         currPiece.setPotentialTopLeft(currX + 1, currY);
@@ -131,7 +137,9 @@ public class TetrisGame extends Application {
             updateScore(linesCleared, scoreLabel);
             updateBoardLandedGUI(grid);
 
-            spawnTetromino();
+            currPiece = nextPiece;
+            nextPiece = spawnTetromino();
+            layoutGrid.add(updatePreviewBox(nextPiece), 1, 0);
         }
         else {
             // no collision, tetromino continues falling
@@ -164,7 +172,7 @@ public class TetrisGame extends Application {
     }
 
     private Color findColor(int code) {
-        Color color = Color.BLACK;
+        Color color;
         switch (code) {
             case 1:
                 color = Color.DARKTURQUOISE;
@@ -186,6 +194,9 @@ public class TetrisGame extends Application {
                 break;
             case 7:
                 color = Color.ORANGE;
+                break;
+            default:
+                color = Color.SILVER;
                 break;
         }
         return color;
@@ -238,8 +249,7 @@ public class TetrisGame extends Application {
     {
         //the game over text
         Text gameOverText = new Text("Game Over");
-        gameOverText.setFont(Font.font("Courier New",
-                FontWeight.EXTRA_BOLD, GAME_OVER_TEXT_SIZE));
+        gameOverText.setFont(Font.font("Courier New", FontWeight.EXTRA_BOLD, GAME_OVER_TEXT_SIZE));
         gameOverText.setFill(Color.BLACK);
         GridPane.setHalignment(gameOverText, HPos.CENTER);
         GridPane.setValignment(gameOverText, VPos.CENTER);
@@ -273,6 +283,17 @@ public class TetrisGame extends Application {
         }
 
         scoreLabel.setText("Score: " + score);
+    }
+
+    private GridPane updatePreviewBox(Tetromino piece) {
+        GridPane preview = new GridPane();
+        for (int i = 0; i < Tetromino.MATRIX_SIZE; i++) {
+            for (int j = 0; j < Tetromino.MATRIX_SIZE; j++) {
+                Rectangle tile = new Rectangle(PRE_TILE_SIZE, PRE_TILE_SIZE, findColor(piece.getMatrix()[i][j]));
+                preview.add(tile, j, i);
+            }
+        }
+        return preview;
     }
 
     public static void main(String[] args) {
