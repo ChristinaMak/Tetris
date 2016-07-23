@@ -4,6 +4,7 @@ import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
+import javafx.geometry.Insets;
 import javafx.geometry.VPos;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyEvent;
@@ -19,7 +20,7 @@ import java.util.Random;
 
 public class TetrisGame extends Application {
     private static final int TILE_SIZE = 40;
-    private static final int PRE_TILE_SIZE = 20;
+    private static final int PRE_TILE_SIZE = 30;
     private static final int GRID_WIDTH = 650;
     private static final int GRID_HEIGHT = 750;
     private static final int TILE_GAP = 1;
@@ -27,6 +28,7 @@ public class TetrisGame extends Application {
     private static final int SCORE_SPAN = 4;
     private static final double GAME_OVER_TEXT_SIZE = 50;
     private static final double SCORE_TEXT_SIZE = 20;
+    private static final double PADDING = 25;
 
     private double time;
 
@@ -39,9 +41,14 @@ public class TetrisGame extends Application {
     public void start(Stage primaryStage) throws Exception{
         GridPane grid = new GridPane();
         grid.setStyle("-fx-background-color: #c0c0c0");
+        //GridPane sideGrid = new GridPane();
+
         GridPane layoutGrid = new GridPane();
         layoutGrid.add(grid, 0, 0);
         layoutGrid.setStyle("-fx-background-color: #9b978e");
+        layoutGrid.setPadding(new Insets(PADDING, PADDING, PADDING, PADDING));
+        layoutGrid.setHgap(PADDING);
+
         primaryStage.setTitle("Tetris");
         Scene scene = new Scene(layoutGrid, GRID_WIDTH, GRID_HEIGHT);
         Text scoreLabel = createScore(layoutGrid);
@@ -85,9 +92,11 @@ public class TetrisGame extends Application {
     private void create(GridPane grid, Scene scene, Text scoreLabel, GridPane layoutGrid) {
         board = new TetrisBoard();
         drawGridSquares(grid);
+        //updatePreviewBox(nextPiece);
         currPiece = spawnTetromino();
         nextPiece = spawnTetromino();
-        updatePreviewBox(nextPiece);
+        //update(grid, layoutGrid, scoreLabel, false);
+        layoutGrid.add(updatePreviewBox(nextPiece), 1, 0);
 
         AnimationTimer timer = new AnimationTimer() {
             @Override
@@ -286,10 +295,18 @@ public class TetrisGame extends Application {
     }
 
     private GridPane updatePreviewBox(Tetromino piece) {
+        System.out.println("called update pre");
         GridPane preview = new GridPane();
         for (int i = 0; i < Tetromino.MATRIX_SIZE; i++) {
             for (int j = 0; j < Tetromino.MATRIX_SIZE; j++) {
-                Rectangle tile = new Rectangle(PRE_TILE_SIZE, PRE_TILE_SIZE, findColor(piece.getMatrix()[i][j]));
+                Rectangle tile;
+                if (piece != null) {
+                    tile = new Rectangle(PRE_TILE_SIZE, PRE_TILE_SIZE, findColor(piece.getMatrix()[i][j]));
+                }
+                else {
+                    System.out.println("called else");
+                    tile = new Rectangle(PRE_TILE_SIZE, PRE_TILE_SIZE, Color.SILVER);
+                }
                 preview.add(tile, j, i);
             }
         }
