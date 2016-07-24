@@ -111,7 +111,7 @@ public class TetrisTester {
         //currPiece.setPotentialTopLeft(15, 4);
         currPiece.setPotentialTopLeft(1, 4);
 
-        if (board.checkCollisions(currPiece))
+        if (board.checkCollisions(currPiece) == 1)
         {
             //System.out.println("Before landing topLeft x: " + currPiece.getTopLeft().getKey());
             //System.out.println("Before landing topLeft y: " + currPiece.getTopLeft().getValue());

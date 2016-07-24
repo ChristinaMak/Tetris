@@ -22,8 +22,8 @@ public class TetrisBoard {
      * @param currPiece the tetromino for which collisions will be checked
      * @return whether or not the tetromino had a collision
      */
-    public boolean checkCollisions(Tetromino currPiece) {
-        boolean collided = false;
+    public int checkCollisions(Tetromino currPiece) {
+        int collided = 0;
 
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
@@ -31,20 +31,20 @@ public class TetrisBoard {
 
                     if (i + currPiece.getPotentialTopLeft().getKey() >= landed.length) {
                         // block would be below board
-                        collided = true;
+                        collided = 1;
                     }
                     else if (j + currPiece.getPotentialTopLeft().getValue() < 0) {
                         // block would be to left of board
-                        collided = true;
+                        collided = -1;
                     }
                     else if (j + currPiece.getPotentialTopLeft().getValue() >= landed[0].length) {
                         // block would be to right of board
-                        collided = true;
+                        collided = -1;
                     }
                     else if (landed[i + currPiece.getPotentialTopLeft().getKey()]
                             [j + currPiece.getPotentialTopLeft().getValue()] != 0) {
                         // this space is taken
-                        collided = true;
+                        collided = 1;
                     }
                 }
             }
@@ -116,7 +116,7 @@ public class TetrisBoard {
     public void moveTetromino(Tetromino currPiece, int direction) {
         currPiece.setPotentialTopLeft(currPiece.getTopLeft().getKey(), currPiece.getTopLeft().getValue() + direction);
 
-        if (!checkCollisions(currPiece)) {
+        if (checkCollisions(currPiece) == 0) {
             currPiece.setPrevTopLeft(currPiece.getTopLeft());
             currPiece.setTopLeft(currPiece.getPotentialTopLeft());
         }

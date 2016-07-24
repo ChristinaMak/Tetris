@@ -31,7 +31,9 @@ public class TetrisGame extends Application {
     private static final double PADDING = 25;
 
     private double time;
+    private boolean pauseGame = false;
 
+    AnimationTimer timer;
     private Tetromino currPiece;
     private Tetromino nextPiece;
     private TetrisBoard board;
@@ -41,18 +43,21 @@ public class TetrisGame extends Application {
     public void start(Stage primaryStage) throws Exception{
         GridPane grid = new GridPane();
         grid.setStyle("-fx-background-color: #c0c0c0");
-        //GridPane sideGrid = new GridPane();
+        GridPane sideGrid = new GridPane();
+        GridPane preview = new GridPane();
+        sideGrid.setHgap(PADDING);
 
         GridPane layoutGrid = new GridPane();
         layoutGrid.add(grid, 0, 0);
+        layoutGrid.add(sideGrid, 1, 0);
         layoutGrid.setStyle("-fx-background-color: #9b978e");
         layoutGrid.setPadding(new Insets(PADDING, PADDING, PADDING, PADDING));
         layoutGrid.setHgap(PADDING);
 
         primaryStage.setTitle("Tetris");
         Scene scene = new Scene(layoutGrid, GRID_WIDTH, GRID_HEIGHT);
-        Text scoreLabel = createScore(layoutGrid);
-        create(grid, scene, scoreLabel, layoutGrid);
+        Text scoreLabel = createScore(sideGrid);
+        create(grid, scene, scoreLabel, sideGrid, layoutGrid, preview);
 
         class KeyHandler implements EventHandler<KeyEvent> {
             @Override
@@ -62,23 +67,28 @@ public class TetrisGame extends Application {
                         System.out.println("handle up");
                         board.rotateTetromino(currPiece);
                         removePrevRotatedPieceGUI(grid);
-                        update(grid,layoutGrid, scoreLabel, true);
+                        update(grid,sideGrid, preview, scoreLabel, true);
                         break;
                     case DOWN:
                         System.out.println("handle down");
-                        update(grid, layoutGrid, scoreLabel, false);
+                        update(grid, sideGrid, preview, scoreLabel, false);
                         break;
                     case LEFT:
                         System.out.println("handle move left");
                         board.moveTetromino(currPiece, -1);
                         removePrevPieceGUI(grid);
-                        update(grid, layoutGrid, scoreLabel, true);
+                        update(grid, sideGrid, preview, scoreLabel, true);
                         break;
                     case RIGHT:
                         System.out.println("handle right");
                         board.moveTetromino(currPiece, 1);
                         removePrevPieceGUI(grid);
-                        update(grid, layoutGrid, scoreLabel, true);
+                        update(grid, sideGrid, preview, scoreLabel, true);
+                        break;
+                    case P:
+                        //pauseGame = true;
+                        pauseGame = !pauseGame;
+                        pauseGame();
                         break;
                 }
             }
@@ -89,22 +99,20 @@ public class TetrisGame extends Application {
         primaryStage.show();
     }
 
-    private void create(GridPane grid, Scene scene, Text scoreLabel, GridPane layoutGrid) {
+    private void create(GridPane grid, Scene scene, Text scoreLabel, GridPane sideGrid, GridPane layoutGrid, GridPane preview) {
         board = new TetrisBoard();
         drawGridSquares(grid);
-        //updatePreviewBox(nextPiece);
         currPiece = spawnTetromino();
         nextPiece = spawnTetromino();
-        //update(grid, layoutGrid, scoreLabel, false);
-        layoutGrid.add(updatePreviewBox(nextPiece), 1, 0);
+        updatePreviewBox(preview, sideGrid, nextPiece);
 
-        AnimationTimer timer = new AnimationTimer() {
+        timer = new AnimationTimer() {
             @Override
             public void handle(long now) {
                 time += 0.015;
                 if (time >= 0.5 && !board.checkBoardFull()) {
                     time = 0;
-                    update(grid, layoutGrid, scoreLabel, false);
+                    update(grid, sideGrid, preview, scoreLabel, false);
                 }
                 if (board.checkBoardFull()) {
                     scene.setOnKeyPressed(null);
@@ -129,16 +137,18 @@ public class TetrisGame extends Application {
     private Tetromino spawnTetromino() {
         Tetromino newPiece;
         Random random = new Random();
-        newPiece = new Tetromino(random.nextInt(7));
+        int code = random.nextInt(7);
+        newPiece = new Tetromino(code);
         newPiece.setTopLeft(0, 4);
+        System.out.println("spawn: " + code);
         return newPiece;
     }
 
-    private void update(GridPane grid, GridPane layoutGrid, Text scoreLabel, boolean pause) {
+    private void update(GridPane grid, GridPane sideGrid, GridPane preview, Text scoreLabel, boolean pause) {
         int currX = currPiece.getTopLeft().getKey();
         int currY = currPiece.getTopLeft().getValue();
         currPiece.setPotentialTopLeft(currX + 1, currY);
-        if (board.checkCollisions(currPiece)) {
+        if (board.checkCollisions(currPiece) == 1) {
             // collision found, land tetromino and spawn a new one
             System.out.println("collision: " + currX + ", " + currY);
             board.landTetromino(currPiece);
@@ -148,7 +158,7 @@ public class TetrisGame extends Application {
 
             currPiece = nextPiece;
             nextPiece = spawnTetromino();
-            layoutGrid.add(updatePreviewBox(nextPiece), 1, 0);
+            updatePreviewBox(preview, sideGrid, nextPiece);
         }
         else {
             // no collision, tetromino continues falling
@@ -260,7 +270,7 @@ public class TetrisGame extends Application {
         Text gameOverText = new Text("Game Over");
         gameOverText.setFont(Font.font("Courier New", FontWeight.EXTRA_BOLD, GAME_OVER_TEXT_SIZE));
         gameOverText.setFill(Color.BLACK);
-        GridPane.setHalignment(gameOverText, HPos.CENTER);
+        //GridPane.setHalignment(gameOverText, HPos.CENTER);
         GridPane.setValignment(gameOverText, VPos.CENTER);
         grid.add(gameOverText, 0, TetrisBoard.NUM_ROWS, GAME_OVER_SPAN, GAME_OVER_SPAN);
 
@@ -270,7 +280,7 @@ public class TetrisGame extends Application {
     private Text createScore(GridPane grid) {
         Text scoreLabel = new Text("Score: " + score);
         scoreLabel.setFont(Font.font("Courier New", FontWeight.EXTRA_BOLD, SCORE_TEXT_SIZE));
-        grid.add(scoreLabel, 1, 1, SCORE_SPAN, SCORE_SPAN);
+        grid.add(scoreLabel, 0, 1, SCORE_SPAN, SCORE_SPAN);
 
         return scoreLabel;
     }
@@ -291,17 +301,19 @@ public class TetrisGame extends Application {
                 break;
         }
 
+        System.out.println("updating score: " + score);
         scoreLabel.setText("Score: " + score);
     }
 
-    private GridPane updatePreviewBox(Tetromino piece) {
+    private void updatePreviewBox(GridPane preview, GridPane sideGrid, Tetromino piece) {
+        sideGrid.getChildren().remove(preview);
         System.out.println("called update pre");
-        GridPane preview = new GridPane();
         for (int i = 0; i < Tetromino.MATRIX_SIZE; i++) {
             for (int j = 0; j < Tetromino.MATRIX_SIZE; j++) {
                 Rectangle tile;
                 if (piece != null) {
                     tile = new Rectangle(PRE_TILE_SIZE, PRE_TILE_SIZE, findColor(piece.getMatrix()[i][j]));
+                    System.out.println("pre: " + piece.getMatrix()[i][j]);
                 }
                 else {
                     System.out.println("called else");
@@ -310,7 +322,18 @@ public class TetrisGame extends Application {
                 preview.add(tile, j, i);
             }
         }
-        return preview;
+
+        sideGrid.add(preview, 0, 0);
+    }
+
+    // TODO pausing is currently debug mode
+    private void pauseGame() {
+        if (pauseGame) {
+            timer.stop();
+        }
+        else {
+            timer.start();
+        }
     }
 
     public static void main(String[] args) {
