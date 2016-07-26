@@ -14,6 +14,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
 import java.util.Random;
@@ -21,14 +22,15 @@ import java.util.Random;
 public class TetrisGame extends Application {
     private static final int TILE_SIZE = 40;
     private static final int PRE_TILE_SIZE = 30;
-    private static final int GRID_WIDTH = 650;
-    private static final int GRID_HEIGHT = 750;
     private static final int TILE_GAP = 1;
-    private static final int GAME_OVER_SPAN = 10;
-    private static final int SCORE_SPAN = 4;
+    private static final int BOTTOM_SPAN = 1;
+    private static final int SCORE_SPAN = 1;
     private static final double GAME_OVER_TEXT_SIZE = 50;
-    private static final double SCORE_TEXT_SIZE = 20;
+    private static final double SIDE_TEXT_SIZE = 22;
     private static final double PADDING = 25;
+    private static final int GRID_WIDTH =
+            new Double(3*PADDING + TetrisBoard.NUM_COLS*TILE_SIZE + Tetromino.MATRIX_SIZE*PRE_TILE_SIZE).intValue() + 9*TILE_GAP;
+    private static final int GRID_HEIGHT = 750;
 
     private double time;
     private boolean pauseGame = false;
@@ -39,12 +41,20 @@ public class TetrisGame extends Application {
     private TetrisBoard board;
     private int score = 0;
 
+    private Text pauseText;
+
     @Override
     public void start(Stage primaryStage) throws Exception{
         GridPane grid = new GridPane();
         grid.setStyle("-fx-background-color: #c0c0c0");
         GridPane sideGrid = new GridPane();
+        Text nextText = new Text("Next");
+        styleText(nextText);
+        sideGrid.add(nextText, 0, 0);
         GridPane preview = new GridPane();
+        preview.setHgap(TILE_GAP);
+        preview.setVgap(TILE_GAP);
+        preview.setStyle("-fx-background-color: #c0c0c0");
         sideGrid.setHgap(PADDING);
 
         GridPane layoutGrid = new GridPane();
@@ -64,31 +74,39 @@ public class TetrisGame extends Application {
             public void handle(KeyEvent e) {
                 switch (e.getCode()) {
                     case UP:
-                        System.out.println("handle up");
-                        board.rotateTetromino(currPiece);
-                        removePrevRotatedPieceGUI(grid);
-                        update(grid,sideGrid, preview, scoreLabel, true);
-                        break;
+                        if (!pauseGame) {
+                            System.out.println("handle up");
+                            board.rotateTetromino(currPiece);
+                            removePrevRotatedPieceGUI(grid);
+                            update(grid, sideGrid, preview, scoreLabel, true);
+                        }
+                            break;
                     case DOWN:
-                        System.out.println("handle down");
-                        update(grid, sideGrid, preview, scoreLabel, false);
+                        if (!pauseGame) {
+                            System.out.println("handle down");
+                            update(grid, sideGrid, preview, scoreLabel, false);
+                        }
                         break;
                     case LEFT:
-                        System.out.println("handle move left");
-                        board.moveTetromino(currPiece, -1);
-                        removePrevPieceGUI(grid);
-                        update(grid, sideGrid, preview, scoreLabel, true);
+                        if (!pauseGame) {
+                            System.out.println("handle move left");
+                            board.moveTetromino(currPiece, -1);
+                            removePrevPieceGUI(grid);
+                            update(grid, sideGrid, preview, scoreLabel, true);
+                        }
                         break;
                     case RIGHT:
-                        System.out.println("handle right");
-                        board.moveTetromino(currPiece, 1);
-                        removePrevPieceGUI(grid);
-                        update(grid, sideGrid, preview, scoreLabel, true);
+                        if (!pauseGame) {
+                            System.out.println("handle right");
+                            board.moveTetromino(currPiece, 1);
+                            removePrevPieceGUI(grid);
+                            update(grid, sideGrid, preview, scoreLabel, true);
+                        }
                         break;
                     case P:
                         //pauseGame = true;
                         pauseGame = !pauseGame;
-                        pauseGame();
+                        pauseGame(layoutGrid);
                         break;
                 }
             }
@@ -101,6 +119,8 @@ public class TetrisGame extends Application {
 
     private void create(GridPane grid, Scene scene, Text scoreLabel, GridPane sideGrid, GridPane layoutGrid, GridPane preview) {
         board = new TetrisBoard();
+        pauseText = new Text("Paused");
+        styleTextBottom(pauseText);
         drawGridSquares(grid);
         currPiece = spawnTetromino();
         nextPiece = spawnTetromino();
@@ -268,21 +288,40 @@ public class TetrisGame extends Application {
     {
         //the game over text
         Text gameOverText = new Text("Game Over");
-        gameOverText.setFont(Font.font("Courier New", FontWeight.EXTRA_BOLD, GAME_OVER_TEXT_SIZE));
-        gameOverText.setFill(Color.BLACK);
-        //GridPane.setHalignment(gameOverText, HPos.CENTER);
-        GridPane.setValignment(gameOverText, VPos.CENTER);
-        grid.add(gameOverText, 0, TetrisBoard.NUM_ROWS, GAME_OVER_SPAN, GAME_OVER_SPAN);
+        styleTextBottom(gameOverText);
+        grid.add(gameOverText, 0, TetrisBoard.NUM_ROWS, BOTTOM_SPAN, BOTTOM_SPAN);
 
         timer.stop();
     }
 
+    private void displayPause(GridPane grid) {
+        if (pauseGame) {
+            grid.add(pauseText, 0, TetrisBoard.NUM_ROWS, BOTTOM_SPAN, BOTTOM_SPAN);
+        }
+        else {
+            grid.getChildren().remove(pauseText);
+        }
+    }
+
     private Text createScore(GridPane grid) {
-        Text scoreLabel = new Text("Score: " + score);
-        scoreLabel.setFont(Font.font("Courier New", FontWeight.EXTRA_BOLD, SCORE_TEXT_SIZE));
-        grid.add(scoreLabel, 0, 1, SCORE_SPAN, SCORE_SPAN);
+        Text scoreLabel = new Text("\nScore\n " + score);
+        styleText(scoreLabel);
+        grid.add(scoreLabel, 0, 2, SCORE_SPAN, SCORE_SPAN);
 
         return scoreLabel;
+    }
+
+    private void styleTextBottom(Text text) {
+        text.setFont(Font.font("Courier New", FontWeight.EXTRA_BOLD, GAME_OVER_TEXT_SIZE));
+        text.setFill(Color.BLACK);
+        GridPane.setHalignment(text, HPos.CENTER);
+        GridPane.setValignment(text, VPos.CENTER);
+    }
+
+    private void styleText(Text text) {
+        text.setFont(Font.font("Courier New", FontWeight.EXTRA_BOLD, SIDE_TEXT_SIZE));
+        text.setTextAlignment(TextAlignment.CENTER);
+        GridPane.setHalignment(text, HPos.CENTER);
     }
 
     private void updateScore(int linesCleared, Text scoreLabel) {
@@ -302,7 +341,7 @@ public class TetrisGame extends Application {
         }
 
         System.out.println("updating score: " + score);
-        scoreLabel.setText("Score: " + score);
+        scoreLabel.setText("\nScore\n " + score);
     }
 
     private void updatePreviewBox(GridPane preview, GridPane sideGrid, Tetromino piece) {
@@ -323,11 +362,11 @@ public class TetrisGame extends Application {
             }
         }
 
-        sideGrid.add(preview, 0, 0);
+        sideGrid.add(preview, 0, 1);
     }
 
-    // TODO pausing is currently debug mode
-    private void pauseGame() {
+    private void pauseGame(GridPane grid) {
+        displayPause(grid);
         if (pauseGame) {
             timer.stop();
         }
