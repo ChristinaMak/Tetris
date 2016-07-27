@@ -2,6 +2,7 @@ package tetris;
 
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -34,6 +35,7 @@ public class TetrisGame extends Application {
 
     private double time;
     private boolean pauseGame = false;
+    private boolean gameOver = false;
 
     AnimationTimer timer;
     private Tetromino currPiece;
@@ -73,6 +75,7 @@ public class TetrisGame extends Application {
             @Override
             public void handle(KeyEvent e) {
                 switch (e.getCode()) {
+                    case W:
                     case UP:
                         if (!pauseGame) {
                             System.out.println("handle up");
@@ -81,12 +84,14 @@ public class TetrisGame extends Application {
                             update(grid, sideGrid, preview, scoreLabel, true);
                         }
                             break;
+                    case S:
                     case DOWN:
                         if (!pauseGame) {
                             System.out.println("handle down");
                             update(grid, sideGrid, preview, scoreLabel, false);
                         }
                         break;
+                    case A:
                     case LEFT:
                         if (!pauseGame) {
                             System.out.println("handle move left");
@@ -95,6 +100,7 @@ public class TetrisGame extends Application {
                             update(grid, sideGrid, preview, scoreLabel, true);
                         }
                         break;
+                    case D:
                     case RIGHT:
                         if (!pauseGame) {
                             System.out.println("handle right");
@@ -104,13 +110,36 @@ public class TetrisGame extends Application {
                         }
                         break;
                     case P:
-                        //pauseGame = true;
                         pauseGame = !pauseGame;
                         pauseGame(layoutGrid);
                         break;
                 }
             }
         }
+
+        BoxButton restartBtn = new BoxButton("Restart");
+        GridPane.setMargin(restartBtn, new Insets(5, 0, 5, 0));
+        restartBtn.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                restart(grid, scoreLabel, sideGrid, preview, layoutGrid);
+                scene.setOnKeyPressed(new KeyHandler());
+            }
+        });
+        sideGrid.add(restartBtn, 0, 3);
+
+        BoxButton pauseBtn = new BoxButton("Pause");
+        GridPane.setMargin(pauseBtn, new Insets(5, 0, 5, 0));
+        pauseBtn.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                if (!gameOver) {
+                    pauseGame = !pauseGame;
+                    pauseGame(layoutGrid);
+                }
+            }
+        });
+        sideGrid.add(pauseBtn, 0, 4);
 
         scene.setOnKeyPressed(new KeyHandler());
         primaryStage.setScene(scene);
@@ -291,6 +320,7 @@ public class TetrisGame extends Application {
         styleTextBottom(gameOverText);
         grid.add(gameOverText, 0, TetrisBoard.NUM_ROWS, BOTTOM_SPAN, BOTTOM_SPAN);
 
+        gameOver = true;
         timer.stop();
     }
 
@@ -304,8 +334,9 @@ public class TetrisGame extends Application {
     }
 
     private Text createScore(GridPane grid) {
-        Text scoreLabel = new Text("\nScore\n " + score);
+        Text scoreLabel = new Text("Score\n " + score);
         styleText(scoreLabel);
+        GridPane.setMargin(scoreLabel, new Insets(20, 0, 20, 0));
         grid.add(scoreLabel, 0, 2, SCORE_SPAN, SCORE_SPAN);
 
         return scoreLabel;
@@ -338,10 +369,13 @@ public class TetrisGame extends Application {
             case 4:
                 score += 1200;
                 break;
+            case -1:
+                score = 0;
+                break;
         }
 
         System.out.println("updating score: " + score);
-        scoreLabel.setText("\nScore\n " + score);
+        scoreLabel.setText("Score\n " + score);
     }
 
     private void updatePreviewBox(GridPane preview, GridPane sideGrid, Tetromino piece) {
@@ -373,6 +407,21 @@ public class TetrisGame extends Application {
         else {
             timer.start();
         }
+    }
+
+    private void restart(GridPane grid, Text scoreLabel, GridPane sideGrid, GridPane preview, GridPane layoutGrid) {
+        board = new TetrisBoard();
+        updateBoardLandedGUI(grid);
+
+        currPiece = spawnTetromino();
+        nextPiece = spawnTetromino();
+        updatePreviewBox(preview, sideGrid, nextPiece);
+        updateScore(-1, scoreLabel);
+
+        pauseGame = false;
+        layoutGrid.getChildren().remove(pauseText);
+
+        timer.start();
     }
 
     public static void main(String[] args) {
