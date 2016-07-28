@@ -18,7 +18,7 @@ public class BoxButton extends Button {
     Text text;
 
     public BoxButton(String words) {
-        box = new Rectangle(100, 50, Color.SILVER);
+        box = new Rectangle(120, 45, Color.SILVER);
         text = new Text(words);
 
         text.setFont(Font.font("Courier New", FontWeight.EXTRA_BOLD, 20));

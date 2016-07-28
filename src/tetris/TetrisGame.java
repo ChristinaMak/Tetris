@@ -10,6 +10,8 @@ import javafx.geometry.VPos;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
@@ -17,7 +19,9 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
+import java.io.File;
 import java.util.Random;
 
 public class TetrisGame extends Application {
@@ -36,14 +40,17 @@ public class TetrisGame extends Application {
     private double time;
     private boolean pauseGame = false;
     private boolean gameOver = false;
+    private boolean muteSound;
 
     AnimationTimer timer;
+    MediaPlayer mediaPlayer;
     private Tetromino currPiece;
     private Tetromino nextPiece;
     private TetrisBoard board;
     private int score = 0;
 
     private Text pauseText;
+    private Text gameOverText;
 
     @Override
     public void start(Stage primaryStage) throws Exception{
@@ -74,6 +81,10 @@ public class TetrisGame extends Application {
         class KeyHandler implements EventHandler<KeyEvent> {
             @Override
             public void handle(KeyEvent e) {
+                if (gameOver) {
+                    return;
+                }
+
                 switch (e.getCode()) {
                     case W:
                     case UP:
@@ -117,29 +128,7 @@ public class TetrisGame extends Application {
             }
         }
 
-        BoxButton restartBtn = new BoxButton("Restart");
-        GridPane.setMargin(restartBtn, new Insets(5, 0, 5, 0));
-        restartBtn.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                restart(grid, scoreLabel, sideGrid, preview, layoutGrid);
-                scene.setOnKeyPressed(new KeyHandler());
-            }
-        });
-        sideGrid.add(restartBtn, 0, 3);
-
-        BoxButton pauseBtn = new BoxButton("Pause");
-        GridPane.setMargin(pauseBtn, new Insets(5, 0, 5, 0));
-        pauseBtn.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                if (!gameOver) {
-                    pauseGame = !pauseGame;
-                    pauseGame(layoutGrid);
-                }
-            }
-        });
-        sideGrid.add(pauseBtn, 0, 4);
+        createSideButtons(layoutGrid, grid, sideGrid, preview, scoreLabel);
 
         scene.setOnKeyPressed(new KeyHandler());
         primaryStage.setScene(scene);
@@ -151,6 +140,7 @@ public class TetrisGame extends Application {
         pauseText = new Text("Paused");
         styleTextBottom(pauseText);
         drawGridSquares(grid);
+        setMusic();
         currPiece = spawnTetromino();
         nextPiece = spawnTetromino();
         updatePreviewBox(preview, sideGrid, nextPiece);
@@ -164,12 +154,51 @@ public class TetrisGame extends Application {
                     update(grid, sideGrid, preview, scoreLabel, false);
                 }
                 if (board.checkBoardFull()) {
-                    scene.setOnKeyPressed(null);
+                    //scene.setOnKeyPressed(null);
                     displayGameOver(layoutGrid, this);
                 }
             }
         };
         timer.start();
+    }
+
+    private void createSideButtons(GridPane layoutGrid, GridPane grid, GridPane sideGrid, GridPane preview, Text scoreLabel) {
+        // restart button
+        BoxButton restartBtn = new BoxButton("Restart");
+        GridPane.setMargin(restartBtn, new Insets(5, 0, 5, 0));
+        restartBtn.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                restart(grid, scoreLabel, sideGrid, preview, layoutGrid);
+            }
+        });
+        sideGrid.add(restartBtn, 0, 3);
+
+        // pause button
+        BoxButton pauseBtn = new BoxButton("Pause");
+        GridPane.setMargin(pauseBtn, new Insets(5, 0, 5, 0));
+        pauseBtn.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                if (!gameOver) {
+                    pauseGame = !pauseGame;
+                    pauseGame(layoutGrid);
+                }
+            }
+        });
+        sideGrid.add(pauseBtn, 0, 4);
+
+        // mute sound button
+        BoxButton muteBtn = new BoxButton("Mute");
+        GridPane.setMargin(muteBtn, new Insets(5, 0, 5, 0));
+        muteBtn.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                muteSound = !muteSound;
+                mediaPlayer.setMute(muteSound);
+            }
+        });
+        sideGrid.add(muteBtn, 0, 5);
     }
 
     private void drawGridSquares(GridPane grid) {
@@ -316,7 +345,7 @@ public class TetrisGame extends Application {
     private void displayGameOver(GridPane grid, AnimationTimer timer)
     {
         //the game over text
-        Text gameOverText = new Text("Game Over");
+        gameOverText = new Text("Game Over");
         styleTextBottom(gameOverText);
         grid.add(gameOverText, 0, TetrisBoard.NUM_ROWS, BOTTOM_SPAN, BOTTOM_SPAN);
 
@@ -410,18 +439,35 @@ public class TetrisGame extends Application {
     }
 
     private void restart(GridPane grid, Text scoreLabel, GridPane sideGrid, GridPane preview, GridPane layoutGrid) {
+        // reset board
         board = new TetrisBoard();
         updateBoardLandedGUI(grid);
 
+        // reset falling tetromino and sidebar
         currPiece = spawnTetromino();
         nextPiece = spawnTetromino();
         updatePreviewBox(preview, sideGrid, nextPiece);
         updateScore(-1, scoreLabel);
 
+        // reset variables and bottom texts
+        gameOver = false;
         pauseGame = false;
         layoutGrid.getChildren().remove(pauseText);
+        layoutGrid.getChildren().remove(gameOverText);
 
         timer.start();
+    }
+
+    private void setMusic() {
+        String musicFile = "Vicious.mp3";
+        Media sound = new Media(new File(musicFile).toURI().toString());
+        mediaPlayer = new MediaPlayer(sound);
+        mediaPlayer.setOnEndOfMedia(new Runnable() {
+            public void run() {
+                mediaPlayer.seek(Duration.ZERO);
+            }
+        });
+        mediaPlayer.play();
     }
 
     public static void main(String[] args) {
