@@ -5,7 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Created by Christina on 7/14/2016.
+ * Class to represent a Tetris board. Contains board operations and board status checks.
+ * Created by Christina Mak
  */
 public class TetrisBoard {
     public static final int NUM_ROWS = 16;
@@ -56,7 +57,7 @@ public class TetrisBoard {
     /**
      * Checks whether a tetromino will have a collision when rotated
      * @param currPiece the tetromino for which collisions will be checked
-     * @return whether
+     * @return whether or not a collision occurred upon rotation
      */
     public boolean checkRotateCollisions(Tetromino currPiece) {
         boolean collided = false;
@@ -122,6 +123,10 @@ public class TetrisBoard {
         }
     }
 
+    /**
+     * Rotates the tetromino 90 degrees clockwise
+     * @param currPiece the current piece which will be rotated
+     */
     public void rotateTetromino(Tetromino currPiece) {
         currPiece.setPotentialMatrix(currPiece.rotate());
         if (!checkRotateCollisions(currPiece)) {
@@ -130,6 +135,11 @@ public class TetrisBoard {
         }
     }
 
+
+    /**
+     * Checks if any lines are filled and then clears them, moving any rows above downward
+     * @return the number of lines cleared
+     */
     public int clearLineCheck () {
         int linesCleared = 0;
         for (int i = 0; i < NUM_ROWS; i++) {
@@ -153,18 +163,33 @@ public class TetrisBoard {
         return linesCleared;
     }
 
+    /**
+     * Removes a cleared line and moves blocks downward.
+     * @param grid the current matrix of the board of landed blocks
+     * @param row the row of blocks being cleared
+     * @return the matrix of the board of landed blocks with the given row cleared
+     */
     public int[][] spliceLine(int[][] grid, int row) {
         List<int[]> list = new ArrayList<int[]>(Arrays.asList(grid));
         list.remove(row);
         return list.toArray(new int[][]{});
     }
 
+    /**
+     * Adds a new empty row to the top of the matrix of the board
+     * @param grid the matrix of the board of landed blocks after a line have been spliced
+     * @return the matrix of the board of landed blocks with a new empty row added
+     */
     public int[][] addNewLine(int[][] grid) {
         List<int[]> list = new ArrayList<int[]>(Arrays.asList(grid));
         list.add(0, new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
         return list.toArray(new int[][]{});
     }
 
+    /**
+     * Check whether or not the board is full with blocks hitting the top
+     * @return whether or not the board is full
+     */
     public boolean checkBoardFull() {
         boolean full = false;
 
@@ -178,14 +203,25 @@ public class TetrisBoard {
         return full;
     }
 
+    /**
+     * Returns the landed array
+     * @return the array of landed blocks
+     */
     public int[][] getLanded() {
         return landed;
     }
 
+    /**
+     * Sets the landed array to the passed in array
+     * @param landed the new array to which to set the current landed array
+     */
     public void setLanded(int[][] landed) {
         this.landed = landed;
     }
 
+    /**
+     * Prints the landed array of the board
+     */
     public void printBoard() {
         for (int i = 0; i < NUM_ROWS; i++) {
             for (int j = 0; j < NUM_COLS; j++) {

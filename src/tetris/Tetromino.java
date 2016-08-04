@@ -1,15 +1,11 @@
 package tetris;
 
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.*;
 import javafx.scene.paint.Color;
 import javafx.util.Pair;
 
-import java.awt.*;
-import java.util.List;
-
 /**
- * Created by Christina on 7/12/2016.
+ * Class to represent a tetromino piece in a game of Tetris. Contains tetromino properties and the rotate operation.
+ * Created by Christina Mak
  */
 public class Tetromino {
     private javafx.scene.paint.Color color;
@@ -27,10 +23,6 @@ public class Tetromino {
      */
     public Tetromino() {
         matrix = new int[MATRIX_SIZE][MATRIX_SIZE];
-    }
-
-    public Tetromino(int[][] shape) {
-        matrix = shape;
     }
 
     /**
