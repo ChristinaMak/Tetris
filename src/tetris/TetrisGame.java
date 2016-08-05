@@ -35,6 +35,7 @@ public class TetrisGame extends Application {
     private static final int TILE_SIZE = 40;
     private static final int PRE_TILE_SIZE = 30;
     private static final int TILE_GAP = 1;
+    private static final double VOL_START = 0.5;
     private static final int BTM_SPAN = 1;
     private static final int SCORE_SPAN = 1;
     private static final double BTM_TEXT_SIZE = 50;
@@ -45,6 +46,7 @@ public class TetrisGame extends Application {
             new Double(3*PADDING + TetrisBoard.NUM_COLS*TILE_SIZE +
             Tetromino.MATRIX_SIZE*PRE_TILE_SIZE).intValue() + 9*TILE_GAP;
     private static final int GRID_HEIGHT = 750;
+
     private static final int SCORE_IDX = 2;
     private static final int RESTART_IDX = 3;
     private static final int PAUSE_IDX = 4;
@@ -52,6 +54,11 @@ public class TetrisGame extends Application {
     private static final int VOL_IDX = 6;
     private static final int INFO_IDX = 8;
     private static final int VOL_LBL_IDX = 5;
+
+    private static final int SCORE_1 = 40;
+    private static final int SCORE_2 = 100;
+    private static final int SCORE_3 = 300;
+    private static final int SCORE_4 = 1200;
 
     private double time;
     private boolean pauseGame = false;
@@ -79,16 +86,14 @@ public class TetrisGame extends Application {
         GridPane grid = new GridPane();
         grid.setStyle("-fx-background-color: #c0c0c0");
 
-        // create sidebar section
+        // initialize sidebar items
         GridPane sideGrid = new GridPane();
-        Text nextText = new Text("Next");
         GridPane preview = new GridPane();
-        createSideBar(sideGrid, nextText, preview);
         Text scoreLabel = createScore(sideGrid);
 
         GridPane layoutGrid = new GridPane();
         createLayout(layoutGrid, grid, sideGrid);
-        createSideButtons(layoutGrid, grid, sideGrid, preview, scoreLabel);
+        createSideBar(layoutGrid, grid, sideGrid, preview, scoreLabel);
         primaryStage.setTitle("Tetris");
         Scene scene = new Scene(layoutGrid, GRID_WIDTH, GRID_HEIGHT);
         create(grid, scoreLabel, sideGrid, layoutGrid, preview);
@@ -204,19 +209,6 @@ public class TetrisGame extends Application {
         layoutGrid.setHgap(PADDING);
     }
 
-    /**
-     * Creates the sidebar
-     * @param sideGrid the sidebar gridpane
-     * @param nextText the text label "Next" for the preview box
-     * @param preview the preview box gridpane
-     */
-    private void createSideBar(GridPane sideGrid, Text nextText,
-                               GridPane preview) {
-        styleText(nextText);
-        sideGrid.add(nextText, 0, 0);
-        stylePreview(preview);
-        sideGrid.setHgap(PADDING);
-    }
 
     /**
      * Styles the preview box's grid gaps and background color
@@ -229,16 +221,26 @@ public class TetrisGame extends Application {
     }
 
     /**
-     * Creates the buttons for the sidebar and the information box
+     * Creates the sidebar elements
      * @param layoutGrid the layout gridpane
      * @param grid the board gridpane
      * @param sideGrid the sidebar gridpane
      * @param preview the preview box gridpane
      * @param scoreLabel the Text for the score
      */
-    private void createSideButtons(GridPane layoutGrid, GridPane grid,
-                                   GridPane sideGrid, GridPane preview,
-                                   Text scoreLabel) {
+    private void createSideBar(GridPane layoutGrid, GridPane grid,
+                               GridPane sideGrid, GridPane preview,
+                               Text scoreLabel) {
+        sideGrid.setHgap(PADDING);
+
+        // next text
+        Text nextText = new Text("Next");
+        styleText(nextText);
+        sideGrid.add(nextText, 0, 0);
+
+        // preview box
+        stylePreview(preview);
+
         // restart button
         BoxButton restartBtn = new BoxButton("Restart");
         GridPane.setMargin(restartBtn, new Insets(5, 0, 5, 0));
@@ -268,16 +270,8 @@ public class TetrisGame extends Application {
         sideGrid.add(muteBtn, 0, MUTE_IDX);
 
         // volume slider for music
-        Slider volSlider = new Slider(0, 1, .5);
-        volSlider.valueProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                mediaPlayer.setVolume(newValue.doubleValue());
-                grid.requestFocus();
-            }
-        });
-        volSlider.setFocusTraversable(false);
-        GridPane.setMargin(volSlider, new Insets(10, 0, 5, 0));
+        Slider volSlider = new Slider(0, 1, VOL_START);
+        setUpSlider(volSlider, grid);
         sideGrid.add(volSlider, 0, VOL_IDX);
 
         // volume label
@@ -289,12 +283,38 @@ public class TetrisGame extends Application {
         // information box
         Text info = new Text("Use the arrow\n keys or WASD\n to move." +
                 "\n\nN = restart\nP = pause\nM = mute\n");
+        styleInfo(info);
+        sideGrid.add(info, 0, INFO_IDX);
+    }
+
+    /**
+     * Sets up the volume slider for the music
+     * @param volSlider the volume slider
+     * @param grid the board gridpane
+     */
+    private void setUpSlider(Slider volSlider, GridPane grid) {
+        volSlider.valueProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable,
+                                Number oldValue, Number newValue) {
+                mediaPlayer.setVolume(newValue.doubleValue());
+                grid.requestFocus();
+            }
+        });
+        volSlider.setFocusTraversable(false);
+        GridPane.setMargin(volSlider, new Insets(10, 0, 5, 0));
+    }
+
+    /**
+     * Styles the sidebar information box for controls
+     * @param info the information textbox
+     */
+    private void styleInfo(Text info) {
         info.setFont(Font.font("Courier New", FontWeight.EXTRA_BOLD,
                 INFO_TEXT_SIZE));
         info.setTextAlignment(TextAlignment.CENTER);
         GridPane.setHalignment(info, HPos.CENTER);
         GridPane.setMargin(info, new Insets(20, 0, 20, 0));
-        sideGrid.add(info, 0, INFO_IDX);
     }
 
     /**
@@ -568,16 +588,16 @@ public class TetrisGame extends Application {
     private void updateScore(int linesCleared, Text scoreLabel) {
         switch (linesCleared) {
             case 1:
-                score += 40;
+                score += SCORE_1;
                 break;
             case 2:
-                score += 100;
+                score += SCORE_2;
                 break;
             case 3:
-                score += 300;
+                score += SCORE_3;
                 break;
             case 4:
-                score += 1200;
+                score += SCORE_4;
                 break;
             case -1:
                 score = 0;
@@ -667,7 +687,7 @@ public class TetrisGame extends Application {
         mediaPlayer.setOnEndOfMedia(() -> {
             mediaPlayer.seek(Duration.ZERO);
         });
-        mediaPlayer.setVolume(0.5);
+        mediaPlayer.setVolume(VOL_START);
         mediaPlayer.play();
     }
 
