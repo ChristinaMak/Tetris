@@ -2,11 +2,14 @@ package tetris;
 
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.VPos;
 import javafx.scene.Scene;
+import javafx.scene.control.Slider;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.media.Media;
@@ -42,6 +45,13 @@ public class TetrisGame extends Application {
             new Double(3*PADDING + TetrisBoard.NUM_COLS*TILE_SIZE +
             Tetromino.MATRIX_SIZE*PRE_TILE_SIZE).intValue() + 9*TILE_GAP;
     private static final int GRID_HEIGHT = 750;
+    private static final int SCORE_IDX = 2;
+    private static final int RESTART_IDX = 3;
+    private static final int PAUSE_IDX = 4;
+    private static final int MUTE_IDX = 7;
+    private static final int VOL_IDX = 6;
+    private static final int INFO_IDX = 8;
+    private static final int VOL_LBL_IDX = 5;
 
     private double time;
     private boolean pauseGame = false;
@@ -235,7 +245,7 @@ public class TetrisGame extends Application {
         restartBtn.setOnAction(e -> {
             restart(grid, scoreLabel, sideGrid, preview, layoutGrid);
         });
-        sideGrid.add(restartBtn, 0, 3);
+        sideGrid.add(restartBtn, 0, RESTART_IDX);
 
         // pause button
         BoxButton pauseBtn = new BoxButton("Pause");
@@ -246,7 +256,7 @@ public class TetrisGame extends Application {
                 pauseGame(layoutGrid);
             }
         });
-        sideGrid.add(pauseBtn, 0, 4);
+        sideGrid.add(pauseBtn, 0, PAUSE_IDX);
 
         // mute sound button
         BoxButton muteBtn = new BoxButton("Mute");
@@ -255,7 +265,26 @@ public class TetrisGame extends Application {
             muteSound = !muteSound;
             mediaPlayer.setMute(muteSound);
         });
-        sideGrid.add(muteBtn, 0, 5);
+        sideGrid.add(muteBtn, 0, MUTE_IDX);
+
+        // volume slider for music
+        Slider volSlider = new Slider(0, 1, .5);
+        volSlider.valueProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                mediaPlayer.setVolume(newValue.doubleValue());
+                grid.requestFocus();
+            }
+        });
+        volSlider.setFocusTraversable(false);
+        GridPane.setMargin(volSlider, new Insets(10, 0, 5, 0));
+        sideGrid.add(volSlider, 0, VOL_IDX);
+
+        // volume label
+        Text volLabel = new Text("Volume");
+        styleText(volLabel);
+        GridPane.setMargin(volLabel, new Insets(20, 0, 0, 0));
+        sideGrid.add(volLabel, 0, VOL_LBL_IDX);
 
         // information box
         Text info = new Text("Use the arrow\n keys or WASD\n to move." +
@@ -265,7 +294,7 @@ public class TetrisGame extends Application {
         info.setTextAlignment(TextAlignment.CENTER);
         GridPane.setHalignment(info, HPos.CENTER);
         GridPane.setMargin(info, new Insets(20, 0, 20, 0));
-        sideGrid.add(info, 0, 6);
+        sideGrid.add(info, 0, INFO_IDX);
     }
 
     /**
@@ -503,7 +532,7 @@ public class TetrisGame extends Application {
         Text scoreLabel = new Text("Score\n " + score);
         styleText(scoreLabel);
         GridPane.setMargin(scoreLabel, new Insets(20, 0, 20, 0));
-        grid.add(scoreLabel, 0, 2, SCORE_SPAN, SCORE_SPAN);
+        grid.add(scoreLabel, 0, SCORE_IDX, SCORE_SPAN, SCORE_SPAN);
 
         return scoreLabel;
     }
@@ -638,6 +667,7 @@ public class TetrisGame extends Application {
         mediaPlayer.setOnEndOfMedia(() -> {
             mediaPlayer.seek(Duration.ZERO);
         });
+        mediaPlayer.setVolume(0.5);
         mediaPlayer.play();
     }
 

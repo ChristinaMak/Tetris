@@ -31,8 +31,9 @@ public class BoxButton extends Button {
         StackPane pane = new StackPane(box, text);
         super.setGraphic(pane);
 
-        // remove default button bordering
+        // remove default button bordering and focusing
         this.setStyle("-fx-focus-color: transparent;");
         this.setPadding(Insets.EMPTY);
+        this.setFocusTraversable(false);
     }
 }
