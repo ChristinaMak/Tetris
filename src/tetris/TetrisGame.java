@@ -2,7 +2,6 @@ package tetris;
 
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -27,19 +26,21 @@ import java.util.Random;
 /**
  * Class for a Tetris game application.
  * Created by Christina Mak
+ * July 18, 2016
  */
 public class TetrisGame extends Application {
     private static final int TILE_SIZE = 40;
     private static final int PRE_TILE_SIZE = 30;
     private static final int TILE_GAP = 1;
-    private static final int BOTTOM_SPAN = 1;
+    private static final int BTM_SPAN = 1;
     private static final int SCORE_SPAN = 1;
-    private static final double GAME_OVER_TEXT_SIZE = 50;
+    private static final double BTM_TEXT_SIZE = 50;
     private static final double SIDE_TEXT_SIZE = 22;
     private static final double INFO_TEXT_SIZE = 14;
     private static final double PADDING = 25;
     private static final int GRID_WIDTH =
-            new Double(3*PADDING + TetrisBoard.NUM_COLS*TILE_SIZE + Tetromino.MATRIX_SIZE*PRE_TILE_SIZE).intValue() + 9*TILE_GAP;
+            new Double(3*PADDING + TetrisBoard.NUM_COLS*TILE_SIZE +
+            Tetromino.MATRIX_SIZE*PRE_TILE_SIZE).intValue() + 9*TILE_GAP;
     private static final int GRID_HEIGHT = 750;
 
     private double time;
@@ -64,22 +65,27 @@ public class TetrisGame extends Application {
      */
     @Override
     public void start(Stage primaryStage) throws Exception{
+        // create board section
         GridPane grid = new GridPane();
         grid.setStyle("-fx-background-color: #c0c0c0");
+
+        // create sidebar section
         GridPane sideGrid = new GridPane();
         Text nextText = new Text("Next");
         GridPane preview = new GridPane();
         createSideBar(sideGrid, nextText, preview);
+        Text scoreLabel = createScore(sideGrid);
 
         GridPane layoutGrid = new GridPane();
         createLayout(layoutGrid, grid, sideGrid);
-
+        createSideButtons(layoutGrid, grid, sideGrid, preview, scoreLabel);
         primaryStage.setTitle("Tetris");
         Scene scene = new Scene(layoutGrid, GRID_WIDTH, GRID_HEIGHT);
-        Text scoreLabel = createScore(sideGrid);
-        createSideButtons(layoutGrid, grid, sideGrid, preview, scoreLabel);
-        create(grid, scene, scoreLabel, sideGrid, layoutGrid, preview);
+        create(grid, scoreLabel, sideGrid, layoutGrid, preview);
 
+        /**
+         * Class to handle key presses to control game
+         */
         class KeyHandler implements EventHandler<KeyEvent> {
             @Override
             public void handle(KeyEvent e) {
@@ -91,7 +97,6 @@ public class TetrisGame extends Application {
                     case W:
                     case UP:
                         if (!pauseGame) {
-                            System.out.println("handle up");
                             board.rotateTetromino(currPiece);
                             removePrevRotatedPieceGUI(grid);
                             update(grid, sideGrid, preview, scoreLabel, true);
@@ -100,14 +105,12 @@ public class TetrisGame extends Application {
                     case S:
                     case DOWN:
                         if (!pauseGame) {
-                            System.out.println("handle down");
                             update(grid, sideGrid, preview, scoreLabel, false);
                         }
                         break;
                     case A:
                     case LEFT:
                         if (!pauseGame) {
-                            System.out.println("handle move left");
                             board.moveTetromino(currPiece, -1);
                             removePrevPieceGUI(grid);
                             update(grid, sideGrid, preview, scoreLabel, true);
@@ -116,7 +119,6 @@ public class TetrisGame extends Application {
                     case D:
                     case RIGHT:
                         if (!pauseGame) {
-                            System.out.println("handle right");
                             board.moveTetromino(currPiece, 1);
                             removePrevPieceGUI(grid);
                             update(grid, sideGrid, preview, scoreLabel, true);
@@ -145,17 +147,17 @@ public class TetrisGame extends Application {
     /**
      * Initializes the layout elements and music. Starts the game timer.
      * @param grid the board gridpane
-     * @param scene
      * @param scoreLabel the Text for the score
      * @param sideGrid the sidebar gridpane
      * @param layoutGrid the layout gridpane
      * @param preview the preview box gridpane
      */
-    private void create(GridPane grid, Scene scene, Text scoreLabel, GridPane sideGrid, GridPane layoutGrid, GridPane preview) {
+    private void create(GridPane grid, Text scoreLabel, GridPane sideGrid,
+                        GridPane layoutGrid, GridPane preview) {
         board = new TetrisBoard();
+        drawGridSquares(grid);
         pauseText = new Text("Paused");
         styleTextBottom(pauseText);
-        drawGridSquares(grid);
         setMusic();
         currPiece = spawnTetromino();
         nextPiece = spawnTetromino();
@@ -183,7 +185,8 @@ public class TetrisGame extends Application {
      * @param grid the board gridpane
      * @param sideGrid the sidebar gridpane
      */
-    private void createLayout(GridPane layoutGrid, GridPane grid, GridPane sideGrid) {
+    private void createLayout(GridPane layoutGrid, GridPane grid,
+                              GridPane sideGrid) {
         layoutGrid.add(grid, 0, 0);
         layoutGrid.add(sideGrid, 1, 0);
         layoutGrid.setStyle("-fx-background-color: #9b978e");
@@ -197,7 +200,8 @@ public class TetrisGame extends Application {
      * @param nextText the text label "Next" for the preview box
      * @param preview the preview box gridpane
      */
-    private void createSideBar(GridPane sideGrid, Text nextText, GridPane preview) {
+    private void createSideBar(GridPane sideGrid, Text nextText,
+                               GridPane preview) {
         styleText(nextText);
         sideGrid.add(nextText, 0, 0);
         stylePreview(preview);
@@ -222,7 +226,9 @@ public class TetrisGame extends Application {
      * @param preview the preview box gridpane
      * @param scoreLabel the Text for the score
      */
-    private void createSideButtons(GridPane layoutGrid, GridPane grid, GridPane sideGrid, GridPane preview, Text scoreLabel) {
+    private void createSideButtons(GridPane layoutGrid, GridPane grid,
+                                   GridPane sideGrid, GridPane preview,
+                                   Text scoreLabel) {
         // restart button
         BoxButton restartBtn = new BoxButton("Restart");
         GridPane.setMargin(restartBtn, new Insets(5, 0, 5, 0));
@@ -252,8 +258,10 @@ public class TetrisGame extends Application {
         sideGrid.add(muteBtn, 0, 5);
 
         // information box
-        Text info = new Text("Use the arrow\n keys or WASD\n to move.\n\nN = restart\nP = pause\nM = mute\n");
-        info.setFont(Font.font("Courier New", FontWeight.EXTRA_BOLD, INFO_TEXT_SIZE));
+        Text info = new Text("Use the arrow\n keys or WASD\n to move." +
+                "\n\nN = restart\nP = pause\nM = mute\n");
+        info.setFont(Font.font("Courier New", FontWeight.EXTRA_BOLD,
+                INFO_TEXT_SIZE));
         info.setTextAlignment(TextAlignment.CENTER);
         GridPane.setHalignment(info, HPos.CENTER);
         GridPane.setMargin(info, new Insets(20, 0, 20, 0));
@@ -269,7 +277,8 @@ public class TetrisGame extends Application {
         grid.setHgap(TILE_GAP);
         for (int i = 0; i < TetrisBoard.NUM_ROWS; i++) {
             for (int j = 0; j < TetrisBoard.NUM_COLS; j++) {
-                Rectangle block = new Rectangle(TILE_SIZE, TILE_SIZE, Color.SILVER);
+                Rectangle block = new Rectangle(TILE_SIZE, TILE_SIZE,
+                        Color.SILVER);
                 grid.add(block, j, i);
             }
         }
@@ -285,7 +294,6 @@ public class TetrisGame extends Application {
         int code = random.nextInt(7);
         newPiece = new Tetromino(code);
         newPiece.setTopLeft(0, 4);
-        System.out.println("spawn: " + code);
         return newPiece;
     }
 
@@ -297,13 +305,13 @@ public class TetrisGame extends Application {
      * @param scoreLabel the Text for the score
      * @param pause whether or not the game is paused
      */
-    private void update(GridPane grid, GridPane sideGrid, GridPane preview, Text scoreLabel, boolean pause) {
+    private void update(GridPane grid, GridPane sideGrid, GridPane preview,
+                        Text scoreLabel, boolean pause) {
         int currX = currPiece.getTopLeft().getKey();
         int currY = currPiece.getTopLeft().getValue();
         currPiece.setPotentialTopLeft(currX + 1, currY);
         if (board.checkCollisions(currPiece) == 1) {
             // collision found, land tetromino and spawn a new one
-            System.out.println("collision: " + currX + ", " + currY);
             board.landTetromino(currPiece);
             int linesCleared = board.clearLineCheck();
             updateScore(linesCleared, scoreLabel);
@@ -323,9 +331,6 @@ public class TetrisGame extends Application {
 
         removePrevPieceGUI(grid);
         updateCurrPieceGUI(grid);
-
-        board.printBoard();
-        System.out.println();
     }
 
     /**
@@ -337,7 +342,8 @@ public class TetrisGame extends Application {
             for (int j = 0; j < TetrisBoard.NUM_COLS; j++) {
                 Rectangle block;
                 if (board.getLanded()[i][j] != 0) {
-                    block = new Rectangle(TILE_SIZE, TILE_SIZE, findColor(board.getLanded()[i][j]));
+                    block = new Rectangle(TILE_SIZE, TILE_SIZE,
+                            findColor(board.getLanded()[i][j]));
 
                 }
                 else {
@@ -349,7 +355,8 @@ public class TetrisGame extends Application {
     }
 
     /**
-     * Determines the color the block depending on the code of the block of the landed array
+     * Determines the color the block depending on the code of the block of the
+     *     landed array
      * @param code the code of the block in the landed array
      * @return the color of the block
      */
@@ -392,9 +399,10 @@ public class TetrisGame extends Application {
         for (int i = 0; i < Tetromino.MATRIX_SIZE; i++) {
             for (int j = 0; j < Tetromino.MATRIX_SIZE; j++) {
                 if (currPiece.getMatrix()[i][j] != 0) {
-                    Rectangle block = new Rectangle(TILE_SIZE, TILE_SIZE, currPiece.getColor());
-                    System.out.println("updateCurrPieceGUI " + j + currPiece.getTopLeft().getValue() + ", " + i + currPiece.getTopLeft().getKey());
-                    grid.add(block, j + currPiece.getTopLeft().getValue(), i + currPiece.getTopLeft().getKey());
+                    Rectangle block = new Rectangle(TILE_SIZE, TILE_SIZE,
+                            currPiece.getColor());
+                    grid.add(block, j + currPiece.getTopLeft().getValue(), i +
+                            currPiece.getTopLeft().getKey());
                 }
             }
         }
@@ -408,11 +416,18 @@ public class TetrisGame extends Application {
         for (int i = 0; i < Tetromino.MATRIX_SIZE; i++) {
             for (int j = 0; j < Tetromino.MATRIX_SIZE; j++) {
                 if (currPiece.getMatrix()[i][j] != 0) {
-                    Rectangle block = new Rectangle(TILE_SIZE, TILE_SIZE, Color.SILVER);
+                    Rectangle block = new Rectangle(TILE_SIZE, TILE_SIZE,
+                            Color.SILVER);
                     // bounds checking to prevent going off board
-                    if (j + currPiece.getPrevTopLeft().getValue() < TetrisBoard.NUM_COLS &&
-                            i + currPiece.getPrevTopLeft().getKey() < TetrisBoard.NUM_ROWS) {
-                        grid.add(block, j + currPiece.getPrevTopLeft().getValue(), i + currPiece.getPrevTopLeft().getKey());
+                    if (currPiece.hasPrevTopLeft() &&
+                        j + currPiece.getPrevTopLeft().getValue() <
+                        TetrisBoard.NUM_COLS &&
+                        j + currPiece.getPrevTopLeft().getValue() >= 0 &&
+                        i + currPiece.getPrevTopLeft().getKey() <
+                        TetrisBoard.NUM_ROWS) {
+                            // add background color blocks at previous positions
+                            grid.add(block, j + currPiece.getPrevTopLeft().getValue(),
+                                i + currPiece.getPrevTopLeft().getKey());
                     }
                 }
             }
@@ -431,11 +446,16 @@ public class TetrisGame extends Application {
         for (int i = 0; i < Tetromino.MATRIX_SIZE; i++) {
             for (int j = 0; j < Tetromino.MATRIX_SIZE; j++) {
                 if (currPiece.getPrevMatrix()[i][j] != 0) {
-                    Rectangle block = new Rectangle(TILE_SIZE, TILE_SIZE, Color.SILVER);
+                    Rectangle block = new Rectangle(TILE_SIZE, TILE_SIZE,
+                            Color.SILVER);
                     // bounds checking to prevent going off board
-                    if (j + currPiece.getTopLeft().getValue() <  TetrisBoard.NUM_COLS &&
-                            i + currPiece.getTopLeft().getKey() < TetrisBoard.NUM_ROWS) {
-                        grid.add(block, j + currPiece.getTopLeft().getValue(), i + currPiece.getTopLeft().getKey());
+                    if (j + currPiece.getTopLeft().getValue() <
+                            TetrisBoard.NUM_COLS &&
+                            i + currPiece.getTopLeft().getKey() <
+                                    TetrisBoard.NUM_ROWS) {
+                        // add background-colored blocks at previous positions
+                        grid.add(block, j + currPiece.getTopLeft().getValue(),
+                                i + currPiece.getTopLeft().getKey());
                     }
                 }
             }
@@ -443,7 +463,8 @@ public class TetrisGame extends Application {
     }
 
     /**
-     * Displays the game over text at the bottom of the screen and stops the game
+     * Displays the game over text at the bottom of the screen and
+     *     stops the game
      * @param grid the layout grid
      * @param timer the timer for the game
      */
@@ -452,7 +473,7 @@ public class TetrisGame extends Application {
         //the game over text
         gameOverText = new Text("Game Over");
         styleTextBottom(gameOverText);
-        grid.add(gameOverText, 0, TetrisBoard.NUM_ROWS, BOTTOM_SPAN, BOTTOM_SPAN);
+        grid.add(gameOverText, 0, TetrisBoard.NUM_ROWS, BTM_SPAN, BTM_SPAN);
 
         // stops the game
         gameOver = true;
@@ -460,12 +481,13 @@ public class TetrisGame extends Application {
     }
 
     /**
-     * Displays or removes the bottom pause message depending on whether or not the game is paused
+     * Displays or removes the bottom pause message depending on whether or not
+     *     the game is paused
      * @param grid the layout grid
      */
     private void displayPause(GridPane grid) {
         if (pauseGame) {
-            grid.add(pauseText, 0, TetrisBoard.NUM_ROWS, BOTTOM_SPAN, BOTTOM_SPAN);
+            grid.add(pauseText, 0, TetrisBoard.NUM_ROWS, BTM_SPAN, BTM_SPAN);
         }
         else {
             grid.getChildren().remove(pauseText);
@@ -491,7 +513,8 @@ public class TetrisGame extends Application {
      * @param text the text being styled
      */
     private void styleTextBottom(Text text) {
-        text.setFont(Font.font("Courier New", FontWeight.EXTRA_BOLD, GAME_OVER_TEXT_SIZE));
+        text.setFont(Font.font("Courier New", FontWeight.EXTRA_BOLD,
+                BTM_TEXT_SIZE));
         text.setFill(Color.BLACK);
         GridPane.setHalignment(text, HPos.CENTER);
         GridPane.setValignment(text, VPos.CENTER);
@@ -502,7 +525,8 @@ public class TetrisGame extends Application {
      * @param text the Text being styled
      */
     private void styleText(Text text) {
-        text.setFont(Font.font("Courier New", FontWeight.EXTRA_BOLD, SIDE_TEXT_SIZE));
+        text.setFont(Font.font("Courier New", FontWeight.EXTRA_BOLD,
+                SIDE_TEXT_SIZE));
         text.setTextAlignment(TextAlignment.CENTER);
         GridPane.setHalignment(text, HPos.CENTER);
     }
@@ -531,7 +555,6 @@ public class TetrisGame extends Application {
                 break;
         }
 
-        System.out.println("updating score: " + score);
         scoreLabel.setText("Score\n " + score);
     }
 
@@ -541,19 +564,19 @@ public class TetrisGame extends Application {
      * @param sideGrid the sidebar gridpane
      * @param piece the next tetromino
      */
-    private void updatePreviewBox(GridPane preview, GridPane sideGrid, Tetromino piece) {
+    private void updatePreviewBox(GridPane preview, GridPane sideGrid,
+                                  Tetromino piece) {
         sideGrid.getChildren().remove(preview);
-        System.out.println("called update pre");
         for (int i = 0; i < Tetromino.MATRIX_SIZE; i++) {
             for (int j = 0; j < Tetromino.MATRIX_SIZE; j++) {
                 Rectangle tile;
                 if (piece != null) {
-                    tile = new Rectangle(PRE_TILE_SIZE, PRE_TILE_SIZE, findColor(piece.getMatrix()[i][j]));
-                    System.out.println("pre: " + piece.getMatrix()[i][j]);
+                    tile = new Rectangle(PRE_TILE_SIZE, PRE_TILE_SIZE,
+                            findColor(piece.getMatrix()[i][j]));
                 }
                 else {
-                    System.out.println("called else");
-                    tile = new Rectangle(PRE_TILE_SIZE, PRE_TILE_SIZE, Color.SILVER);
+                    tile = new Rectangle(PRE_TILE_SIZE, PRE_TILE_SIZE,
+                            Color.SILVER);
                 }
                 preview.add(tile, j, i);
             }
@@ -584,7 +607,8 @@ public class TetrisGame extends Application {
      * @param preview the preview box gridpane
      * @param layoutGrid the layout gridpane
      */
-    private void restart(GridPane grid, Text scoreLabel, GridPane sideGrid, GridPane preview, GridPane layoutGrid) {
+    private void restart(GridPane grid, Text scoreLabel, GridPane sideGrid,
+                         GridPane preview, GridPane layoutGrid) {
         // reset board
         board = new TetrisBoard();
         updateBoardLandedGUI(grid);
@@ -611,10 +635,8 @@ public class TetrisGame extends Application {
         String musicFile = "src/resources/Vicious.mp3";
         Media sound = new Media(new File(musicFile).toURI().toString());
         mediaPlayer = new MediaPlayer(sound);
-        mediaPlayer.setOnEndOfMedia(new Runnable() {
-            public void run() {
-                mediaPlayer.seek(Duration.ZERO);
-            }
+        mediaPlayer.setOnEndOfMedia(() -> {
+            mediaPlayer.seek(Duration.ZERO);
         });
         mediaPlayer.play();
     }

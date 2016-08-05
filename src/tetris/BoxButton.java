@@ -10,8 +10,10 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 
 /**
- * Class for a rectangular button with text for use in a Tetris application sidebar.
+ * Class for a rectangular button with text for use in a Tetris application
+ *     sidebar.
  * Created by Christina Mak
+ * July 27, 2016
  */
 public class BoxButton extends Button {
     private Rectangle box;

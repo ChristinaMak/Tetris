@@ -5,8 +5,10 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Class to represent a Tetris board. Contains board operations and board status checks.
+ * Class to represent a Tetris board. Contains board operations and board
+ *     status checks.
  * Created by Christina Mak
+ * July 18, 2016
  */
 public class TetrisBoard {
     public static final int NUM_ROWS = 16;
@@ -14,12 +16,17 @@ public class TetrisBoard {
 
     private int[][] landed;
 
+    /**
+     * Constructor for a Tetris board object with a matrix representing the
+     *     landed tetrominos
+     */
     public TetrisBoard() {
         landed = new int[NUM_ROWS][NUM_COLS];
     }
 
     /**
-     * Checks whether a tetromino will collide with another tetromino or the ground in the next move
+     * Checks whether a tetromino will collide with another tetromino or the
+     *     ground in the next move
      * @param currPiece the tetromino for which collisions will be checked
      * @return whether or not the tetromino had a collision
      */
@@ -30,7 +37,8 @@ public class TetrisBoard {
             for (int j = 0; j < 4; j++) {
                 if (currPiece.getMatrix()[i][j] != 0) {
 
-                    if (i + currPiece.getPotentialTopLeft().getKey() >= landed.length) {
+                    if (i + currPiece.getPotentialTopLeft().getKey() >=
+                            landed.length) {
                         // block would be below board
                         collided = 1;
                     }
@@ -38,7 +46,8 @@ public class TetrisBoard {
                         // block would be to left of board
                         collided = -1;
                     }
-                    else if (j + currPiece.getPotentialTopLeft().getValue() >= landed[0].length) {
+                    else if (j + currPiece.getPotentialTopLeft().getValue() >=
+                            landed[0].length) {
                         // block would be to right of board
                         collided = -1;
                     }
@@ -74,7 +83,8 @@ public class TetrisBoard {
                         // block would be to left of board
                         collided = true;
                     }
-                    else if (j + currPiece.getTopLeft().getValue() >= landed[0].length) {
+                    else if (j + currPiece.getTopLeft().getValue() >=
+                            landed[0].length) {
                         // block would be to right of board
                         collided = true;
                     }
@@ -90,32 +100,31 @@ public class TetrisBoard {
         return collided;
     }
 
+    /**
+     * Lands the tetromino on the board
+     * @param currPiece the current tetromino
+     */
     public void landTetromino(Tetromino currPiece) {
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
                 if (currPiece.getMatrix()[i][j] != 0) {
-                    //System.out.println("Before: " + currPiece.getMatrix()[i][j]);
-                    landed[i + currPiece.getTopLeft().getKey()][j + currPiece.getTopLeft().getValue()]
+                    landed[i + currPiece.getTopLeft().getKey()]
+                        [j + currPiece.getTopLeft().getValue()]
                         = currPiece.getMatrix()[i][j];
-                    this.setLanded(landed); // TODO redundant?
-
-                    //System.out.println("currPiece " + currPiece.getMatrix()[i][j]);
-                    //System.out.println("lt_i: " + i);
-                    //System.out.println(i + currPiece.getTopLeft().getKey());
-                    //System.out.println("lt_j: " + j);
-                    //System.out.println(j + currPiece.getTopLeft().getValue());
-                    //System.out.println("from landTetromino");
-                    //System.out.println("Begin");
-                    //System.out.println(i + currPiece.getTopLeft().getKey());
-                    //System.out.println(j + currPiece.getTopLeft().getValue());
-                    //System.out.println("End");
+                    this.setLanded(landed);
                 }
             }
         }
     }
 
+    /**
+     * Moves the tetromino left or right if no collisions prevents its movement
+     * @param currPiece the current tetromino
+     * @param direction the direction to move, -1 for left or 1 for right
+     */
     public void moveTetromino(Tetromino currPiece, int direction) {
-        currPiece.setPotentialTopLeft(currPiece.getTopLeft().getKey(), currPiece.getTopLeft().getValue() + direction);
+        currPiece.setPotentialTopLeft(currPiece.getTopLeft().getKey(),
+                currPiece.getTopLeft().getValue() + direction);
 
         if (checkCollisions(currPiece) == 0) {
             currPiece.setPrevTopLeft(currPiece.getTopLeft());
@@ -137,7 +146,8 @@ public class TetrisBoard {
 
 
     /**
-     * Checks if any lines are filled and then clears them, moving any rows above downward
+     * Checks if any lines are filled and then clears them, moving any rows
+     *     above downward
      * @return the number of lines cleared
      */
     public int clearLineCheck () {
@@ -151,7 +161,6 @@ public class TetrisBoard {
             }
 
             if (filled) {
-                System.out.println("clear line");
                 linesCleared++;
                 // remove filled line
                 setLanded(spliceLine(this.getLanded(), i));
@@ -167,7 +176,7 @@ public class TetrisBoard {
      * Removes a cleared line and moves blocks downward.
      * @param grid the current matrix of the board of landed blocks
      * @param row the row of blocks being cleared
-     * @return the matrix of the board of landed blocks with the given row cleared
+     * @return matrix of the board of landed blocks with the given row cleared
      */
     public int[][] spliceLine(int[][] grid, int row) {
         List<int[]> list = new ArrayList<int[]>(Arrays.asList(grid));
@@ -177,8 +186,9 @@ public class TetrisBoard {
 
     /**
      * Adds a new empty row to the top of the matrix of the board
-     * @param grid the matrix of the board of landed blocks after a line have been spliced
-     * @return the matrix of the board of landed blocks with a new empty row added
+     * @param grid the matrix of the board of landed blocks after a line have
+     *             been spliced
+     * @return matrix of the board of landed blocks with a new empty row added
      */
     public int[][] addNewLine(int[][] grid) {
         List<int[]> list = new ArrayList<int[]>(Arrays.asList(grid));
@@ -220,7 +230,7 @@ public class TetrisBoard {
     }
 
     /**
-     * Prints the landed array of the board
+     * Prints the landed array of the board to console
      */
     public void printBoard() {
         for (int i = 0; i < NUM_ROWS; i++) {

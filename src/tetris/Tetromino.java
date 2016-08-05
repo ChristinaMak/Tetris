@@ -4,8 +4,10 @@ import javafx.scene.paint.Color;
 import javafx.util.Pair;
 
 /**
- * Class to represent a tetromino piece in a game of Tetris. Contains tetromino properties and the rotate operation.
+ * Class to represent a tetromino piece in a game of Tetris. Contains tetromino
+ *     properties and the rotate operation.
  * Created by Christina Mak
+ * July 18, 2016
  */
 public class Tetromino {
     private javafx.scene.paint.Color color;
@@ -15,6 +17,7 @@ public class Tetromino {
     private Pair<Integer, Integer> topLeft;
     private Pair<Integer, Integer> potentialTopLeft;
     private Pair<Integer, Integer> prevTopLeft;
+    private boolean hasPrevTopLeft = false;
 
     public static final int MATRIX_SIZE = 4;
 
@@ -123,11 +126,16 @@ public class Tetromino {
         this.potentialTopLeft = new Pair<Integer, Integer>(row, col);
     }
 
+    public boolean hasPrevTopLeft() {
+        return hasPrevTopLeft;
+    }
+
     public Pair<Integer, Integer> getPrevTopLeft() {
         return prevTopLeft;
     }
 
     public void setPrevTopLeft(Pair<Integer, Integer> prevTopLeft) {
+        hasPrevTopLeft = true;
         this.prevTopLeft = prevTopLeft;
     }
 
@@ -159,7 +167,6 @@ public class Tetromino {
 
         for (int i = 0; i < MATRIX_SIZE; i++) {
             for (int j = 0; j < MATRIX_SIZE; j++) {
-                //newMatrix[i][j] = transform(matrix[i][j]);
                 if (this.getMatrix()[i][j] != 0) {
                     int newRow = j;
                     int newCol = transform(i);
@@ -170,7 +177,9 @@ public class Tetromino {
         return newMatrix;
     }
 
-    /** Helper for rotate method to transform index positioning */
+    /**
+     * Helper for rotate method to transform index positioning
+     */
     private int transform(int index) {
         int newIndex = index;
         switch (index) {
@@ -182,6 +191,9 @@ public class Tetromino {
         return newIndex;
     }
 
+    /**
+     * Prints the tetromino to console
+     */
     public void printTetromino() {
         for (int i = 0; i < MATRIX_SIZE; i++) {
             for (int j = 0; j < MATRIX_SIZE; j++) {
@@ -192,7 +204,10 @@ public class Tetromino {
         System.out.println();
     }
 
-    /** Helper to turn int code of shape from random generator to char code of shape */
+    /**
+     * Helper to turn int code of shape from random generator to char code of
+     *     shape
+     */
     private static char intToChar(int shape) {
         char shapeChar = 'O';
         switch (shape) {
@@ -221,5 +236,4 @@ public class Tetromino {
         }
         return shapeChar;
     }
-
 }
