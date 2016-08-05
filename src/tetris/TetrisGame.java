@@ -126,6 +126,13 @@ public class TetrisGame extends Application {
                         pauseGame = !pauseGame;
                         pauseGame(layoutGrid);
                         break;
+                    case M:
+                        muteSound = !muteSound;
+                        mediaPlayer.setMute(muteSound);
+                        break;
+                    case N:
+                        restart(grid, scoreLabel, sideGrid, preview, layoutGrid);
+                        break;
                 }
             }
         }
@@ -219,24 +226,18 @@ public class TetrisGame extends Application {
         // restart button
         BoxButton restartBtn = new BoxButton("Restart");
         GridPane.setMargin(restartBtn, new Insets(5, 0, 5, 0));
-        restartBtn.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                restart(grid, scoreLabel, sideGrid, preview, layoutGrid);
-            }
+        restartBtn.setOnAction(e -> {
+            restart(grid, scoreLabel, sideGrid, preview, layoutGrid);
         });
         sideGrid.add(restartBtn, 0, 3);
 
         // pause button
         BoxButton pauseBtn = new BoxButton("Pause");
         GridPane.setMargin(pauseBtn, new Insets(5, 0, 5, 0));
-        pauseBtn.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                if (!gameOver) {
-                    pauseGame = !pauseGame;
-                    pauseGame(layoutGrid);
-                }
+        pauseBtn.setOnAction(e -> {
+            if (!gameOver) {
+                pauseGame = !pauseGame;
+                pauseGame(layoutGrid);
             }
         });
         sideGrid.add(pauseBtn, 0, 4);
@@ -244,17 +245,14 @@ public class TetrisGame extends Application {
         // mute sound button
         BoxButton muteBtn = new BoxButton("Mute");
         GridPane.setMargin(muteBtn, new Insets(5, 0, 5, 0));
-        muteBtn.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                muteSound = !muteSound;
-                mediaPlayer.setMute(muteSound);
-            }
+        muteBtn.setOnAction(e -> {
+            muteSound = !muteSound;
+            mediaPlayer.setMute(muteSound);
         });
         sideGrid.add(muteBtn, 0, 5);
 
         // information box
-        Text info = new Text("Use the arrow\n keys or WASD\n to move.\n\nP = pause\n");
+        Text info = new Text("Use the arrow\n keys or WASD\n to move.\n\nN = restart\nP = pause\nM = mute\n");
         info.setFont(Font.font("Courier New", FontWeight.EXTRA_BOLD, INFO_TEXT_SIZE));
         info.setTextAlignment(TextAlignment.CENTER);
         GridPane.setHalignment(info, HPos.CENTER);
@@ -340,6 +338,7 @@ public class TetrisGame extends Application {
                 Rectangle block;
                 if (board.getLanded()[i][j] != 0) {
                     block = new Rectangle(TILE_SIZE, TILE_SIZE, findColor(board.getLanded()[i][j]));
+
                 }
                 else {
                     block = new Rectangle(TILE_SIZE, TILE_SIZE, Color.SILVER);
@@ -410,11 +409,10 @@ public class TetrisGame extends Application {
             for (int j = 0; j < Tetromino.MATRIX_SIZE; j++) {
                 if (currPiece.getMatrix()[i][j] != 0) {
                     Rectangle block = new Rectangle(TILE_SIZE, TILE_SIZE, Color.SILVER);
-                    //System.out.println("removePrevPieceGUI " + j + currPiece.getPrevTopLeft().getValue() + ", " + i + currPiece.getPrevTopLeft().getKey());
-                    try {
+                    // bounds checking to prevent going off board
+                    if (j + currPiece.getPrevTopLeft().getValue() < TetrisBoard.NUM_COLS &&
+                            i + currPiece.getPrevTopLeft().getKey() < TetrisBoard.NUM_ROWS) {
                         grid.add(block, j + currPiece.getPrevTopLeft().getValue(), i + currPiece.getPrevTopLeft().getKey());
-                    }
-                    catch (NullPointerException e) {
                     }
                 }
             }
@@ -434,7 +432,11 @@ public class TetrisGame extends Application {
             for (int j = 0; j < Tetromino.MATRIX_SIZE; j++) {
                 if (currPiece.getPrevMatrix()[i][j] != 0) {
                     Rectangle block = new Rectangle(TILE_SIZE, TILE_SIZE, Color.SILVER);
-                    grid.add(block, j + currPiece.getTopLeft().getValue(), i + currPiece.getTopLeft().getKey());
+                    // bounds checking to prevent going off board
+                    if (j + currPiece.getTopLeft().getValue() <  TetrisBoard.NUM_COLS &&
+                            i + currPiece.getTopLeft().getKey() < TetrisBoard.NUM_ROWS) {
+                        grid.add(block, j + currPiece.getTopLeft().getValue(), i + currPiece.getTopLeft().getKey());
+                    }
                 }
             }
         }
