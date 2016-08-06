@@ -597,8 +597,8 @@ public class TetrisGame extends Application {
     }
 
     /**
-     * Updates the score and its display
-     * @param linesCleared the number of lines cleared
+     * Updates the score and its display based on number of lines cleared
+     * @param linesCleared the number of lines cleared, -1 for a game restart
      * @param scoreLabel the Text for the score
      */
     private void updateScore(int linesCleared, Text scoreLabel) {

@@ -19,14 +19,18 @@ public class BoxButton extends Button {
     private Rectangle box;
     private Text text;
 
+    private static final int DEF_WIDTH = 120;
+    private static final int DEF_HEIGHT = 45;
+    private static final int FONT_SIZE = 20;
+
     /**
      * Constructor for a rectangular button with text
      * @param words the text on the button
      */
     public BoxButton(String words) {
-        box = new Rectangle(120, 45, Color.SILVER);
+        box = new Rectangle(DEF_WIDTH, DEF_HEIGHT, Color.SILVER);
         text = new Text(words);
-        text.setFont(Font.font("Courier New", FontWeight.EXTRA_BOLD, 20));
+        text.setFont(Font.font("Courier New", FontWeight.EXTRA_BOLD, FONT_SIZE));
 
         StackPane pane = new StackPane(box, text);
         super.setGraphic(pane);

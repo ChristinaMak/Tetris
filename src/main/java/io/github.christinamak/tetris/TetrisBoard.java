@@ -34,8 +34,8 @@ public class TetrisBoard {
     public int checkCollisions(Tetromino currPiece) {
         int collided = 0;
 
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
+        for (int i = 0; i < Tetromino.MATRIX_SIZE; i++) {
+            for (int j = 0; j < Tetromino.MATRIX_SIZE; j++) {
                 if (currPiece.getMatrix()[i][j] != 0) {
 
                     if (i + currPiece.getPotentialTopLeft().getKey() >=
@@ -72,8 +72,8 @@ public class TetrisBoard {
     public boolean checkRotateCollisions(Tetromino currPiece) {
         boolean collided = false;
 
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
+        for (int i = 0; i < Tetromino.MATRIX_SIZE; i++) {
+            for (int j = 0; j < Tetromino.MATRIX_SIZE; j++) {
                 if (currPiece.getPotentialMatrix()[i][j] != 0) {
 
                     if (i + currPiece.getTopLeft().getKey() >= landed.length) {

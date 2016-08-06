@@ -178,7 +178,7 @@ public class Tetromino {
     }
 
     /**
-     * Helper for rotate method to transform index positioning
+     * Helper for a clockwise rotate to transform index positioning
      */
     private int transform(int index) {
         int newIndex = index;
