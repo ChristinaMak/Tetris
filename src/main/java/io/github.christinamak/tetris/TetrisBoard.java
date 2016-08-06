@@ -1,4 +1,4 @@
-package tetris;
+package io.github.christinamak.tetris;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,7 +28,8 @@ public class TetrisBoard {
      * Checks whether a tetromino will collide with another tetromino or the
      *     ground in the next move
      * @param currPiece the tetromino for which collisions will be checked
-     * @return whether or not the tetromino had a collision
+     * @return whether or not the tetromino had a collision,
+     *     0 if none, -1 if with the sides, 1 if at the bottom
      */
     public int checkCollisions(Tetromino currPiece) {
         int collided = 0;

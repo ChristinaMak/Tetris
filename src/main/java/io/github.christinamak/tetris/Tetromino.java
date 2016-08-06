@@ -1,4 +1,4 @@
-package tetris;
+package io.github.christinamak.tetris;
 
 import javafx.scene.paint.Color;
 import javafx.util.Pair;

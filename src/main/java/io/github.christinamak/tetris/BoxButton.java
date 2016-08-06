@@ -1,4 +1,4 @@
-package tetris;
+package io.github.christinamak.tetris;
 
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;

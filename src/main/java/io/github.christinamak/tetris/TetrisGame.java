@@ -1,4 +1,4 @@
-package tetris;
+package io.github.christinamak.tetris;
 
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
@@ -10,6 +10,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.VPos;
 import javafx.scene.Scene;
 import javafx.scene.control.Slider;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.media.Media;
@@ -40,7 +41,7 @@ public class TetrisGame extends Application {
     private static final int SCORE_SPAN = 1;
     private static final double BTM_TEXT_SIZE = 50;
     private static final double SIDE_TEXT_SIZE = 22;
-    private static final double INFO_TEXT_SIZE = 14;
+    private static final double INFO_TEXT_SIZE = 13;
     private static final double PADDING = 25;
     private static final int GRID_WIDTH =
             new Double(3*PADDING + TetrisBoard.NUM_COLS*TILE_SIZE +
@@ -64,6 +65,7 @@ public class TetrisGame extends Application {
     private boolean pauseGame = false;
     private boolean gameOver = false;
     private boolean muteSound;
+    private boolean keepDropping = true;
 
     private AnimationTimer timer;
     private MediaPlayer mediaPlayer;
@@ -105,6 +107,10 @@ public class TetrisGame extends Application {
             @Override
             public void handle(KeyEvent e) {
                 if (gameOver) {
+                    // only key press allowed is to restart game
+                    if (e.getCode() == KeyCode.N) {
+                        restart(grid, scoreLabel, sideGrid, preview, layoutGrid);
+                    }
                     return;
                 }
 
@@ -149,6 +155,14 @@ public class TetrisGame extends Application {
                         break;
                     case N:
                         restart(grid, scoreLabel, sideGrid, preview, layoutGrid);
+                        break;
+                    case SPACE:
+                        if (!pauseGame) {
+                            while(keepDropping) {
+                                update(grid, sideGrid, preview, scoreLabel, false);
+                            }
+                            keepDropping = true;
+                        }
                         break;
                 }
             }
@@ -282,7 +296,8 @@ public class TetrisGame extends Application {
 
         // information box
         Text info = new Text("Use the arrow\n keys or WASD\n to move." +
-                "\n\nN = restart\nP = pause\nM = mute\n");
+                "\n\nUP rotates\nSPACE drops\n\n" +
+                "N = restart\nP = pause\nM = mute\n");
         styleInfo(info);
         sideGrid.add(info, 0, INFO_IDX);
     }
@@ -314,7 +329,7 @@ public class TetrisGame extends Application {
                 INFO_TEXT_SIZE));
         info.setTextAlignment(TextAlignment.CENTER);
         GridPane.setHalignment(info, HPos.CENTER);
-        GridPane.setMargin(info, new Insets(20, 0, 20, 0));
+        GridPane.setMargin(info, new Insets(20, 0, 0, 0));
     }
 
     /**
@@ -361,6 +376,7 @@ public class TetrisGame extends Application {
         currPiece.setPotentialTopLeft(currX + 1, currY);
         if (board.checkCollisions(currPiece) == 1) {
             // collision found, land tetromino and spawn a new one
+            keepDropping = false;
             board.landTetromino(currPiece);
             int linesCleared = board.clearLineCheck();
             updateScore(linesCleared, scoreLabel);
@@ -371,7 +387,7 @@ public class TetrisGame extends Application {
             updatePreviewBox(preview, sideGrid, nextPiece);
         }
         else {
-            // no collision, tetromino continues falling
+            // no collision or collision with sides, tetromino continues falling
             if (!pause) {
                 currPiece.setPrevTopLeft(currPiece.getTopLeft());
                 currPiece.setTopLeft(currPiece.getPotentialTopLeft());
@@ -551,7 +567,7 @@ public class TetrisGame extends Application {
     private Text createScore(GridPane grid) {
         Text scoreLabel = new Text("Score\n " + score);
         styleText(scoreLabel);
-        GridPane.setMargin(scoreLabel, new Insets(20, 0, 20, 0));
+        GridPane.setMargin(scoreLabel, new Insets(20, 0, 15, 0));
         grid.add(scoreLabel, 0, SCORE_IDX, SCORE_SPAN, SCORE_SPAN);
 
         return scoreLabel;
@@ -681,7 +697,7 @@ public class TetrisGame extends Application {
      * Sets the music
      */
     private void setMusic() {
-        String musicFile = "src/resources/Vicious.mp3";
+        String musicFile = "src/main/resources/Vicious.mp3";
         Media sound = new Media(new File(musicFile).toURI().toString());
         mediaPlayer = new MediaPlayer(sound);
         mediaPlayer.setOnEndOfMedia(() -> {
