@@ -1,7 +1,7 @@
 # Tetris
 A Tetris clone made in JavaFX.
 
-
+![alt text](./src/main/resources/tetris_screenshot.png "Tetris gameplay screenshot")
 
 ## Credits
 ### Music
